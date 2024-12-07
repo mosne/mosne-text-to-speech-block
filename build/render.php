@@ -1,7 +1,14 @@
 <div
 	<?php echo get_block_wrapper_attributes(); ?>
 	data-wp-interactive="create-block"
-	<?php echo wp_interactivity_data_wp_context( array( 'isPlaying' => false ) ); ?>
+	data-wp-init="callbacks.init"
+	<?php echo wp_interactivity_data_wp_context( 
+		[
+		 'isPlaying' => false,
+		 'voices' => []
+		 ]
+		 );
+		  ?>
 >
 	<button
 		data-wp-on--click="actions.Play"
@@ -16,12 +23,17 @@
 	<?php esc_html_e( 'Pause', 'mosne-speech-to-text-block' ); ?>
 	</button>
 	<select
-	data-wp-on--change="actions.ChangeVoice"
-	data-wp-context='{ "voices": ["voice1","voice2"] }'>
+	data-wp-on--change="actions.changeVoice"
+	data-wp-context='{ "voices" }'>
 	>
 		<option value=""><?php esc_html_e( 'Select a voice', 'mosne-speech-to-text-block' ); ?></option>
-		<template data-wp-each="context.voices">
-        	<option data-wp-text="context.item" data-wp-value="context.item"></option>
+		<template data-wp-each--voice="context.voices">
+        	<option
+			data-wp-text="context.voice.voiceURI"
+			data-wp-key="context.voice.voiceURI"
+			data-wp-bind--value="context.voice.voiceURI"
+			data-wp-bind--selected="context.voice.voiceURI === context.currentVoice"
+			></option>
     	</template>
 	</select>
 </div>

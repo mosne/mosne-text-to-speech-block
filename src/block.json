@@ -9,7 +9,8 @@
 	"description": "An interactive block with the Interactivity API.",
 	"example": {},
 	"supports": {
-		"interactivity": true
+		"interactivity": true,
+		"multiple": false
 	},
 	"textdomain": "mosne-speech-to-text-block",
 	"editorScript": "file:./index.js",

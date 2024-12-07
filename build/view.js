@@ -63,44 +63,84 @@ __webpack_require__.r(__webpack_exports__);
  */
 
 const {
-  state
+  state,
+  actions
 } = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('create-block', {
   state: {
-    get currentLocale() {
-      return 'en';
-    },
     isPlaying: false,
+    currentVoice: null,
+    utterance: null,
+    voices: [],
+    get availableVoices() {
+      return this.voices;
+    },
+    get currentVoiceURI() {
+      return this.currentVoice?.voiceURI;
+    },
     get isPlaying() {
       return this.isPlaying;
-    },
-    get voices() {
-      return ['voice1', 'voice2'];
-    },
-    get currentVoice() {
-      return 'voice1';
     }
   },
   actions: {
+    loadVoices() {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const availableVoices = window.speechSynthesis.getVoices();
+      context.voices = availableVoices;
+
+      // get current docuemtn locale
+      const currentLocale = document.documentElement.lang;
+
+      // Set default French voice or first available
+      const localVoice = availableVoices.find(voice => voice.lang.startsWith(currentLocale)) || availableVoices[0];
+      context.currentVoice = localVoice;
+
+      // Create initial utterance
+      actions.createUtterance();
+    },
+    createUtterance() {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const content = document.querySelector('main')?.innerText || '';
+      const newUtterance = new SpeechSynthesisUtterance(content);
+      newUtterance.lang = document.documentElement.lang;
+      if (context.currentVoice) {
+        newUtterance.voice = context.currentVoice;
+      }
+      context.utterance = newUtterance;
+    },
     Play() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = true;
       // init speach to text
+      if (window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+      } else if (context.utterance) {
+        window.speechSynthesis.speak(context.utterance);
+      }
     },
     Pause() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = false;
+      window.speechSynthesis.pause();
       // pause speach to text
     },
-    changeVoice() {
+    changeVoice(e) {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
-      context.isPlaying = false;
-      // pause speach to text
+      const voice = context.voices.find(v => v.voiceURI === e.target.value);
+      if (voice) {
+        context.currentVoice = voice;
+        actions.createUtterance();
+      }
     }
   },
   callbacks: {
-    getPageConent: () => {
-      // get all voices
-      return document.querySelector(main).innerText;
+    init() {
+      // Initialize voices when available
+      if (window.speechSynthesis) {
+        actions.loadVoices();
+        if (window.speechSynthesis.onvoiceschanged !== undefined) {
+          window.speechSynthesis.onvoiceschanged = actions.loadVoices;
+        }
+      }
     }
   }
 });
