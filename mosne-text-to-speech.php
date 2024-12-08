@@ -1,7 +1,7 @@
 <?php
 /**
- * Plugin Name:       Mosne Speech To Text Block
- * Description:       An interactive block with the Interactivity API.
+ * Plugin Name:       Mosne Text to Speech Block
+ * Description:       Read the content of of a page using native Speech Synthesis and  Interactivity API.
  * Version:           0.1.0
  * Requires at least: 6.6
  * Requires PHP:      7.2
