@@ -65,7 +65,7 @@ __webpack_require__.r(__webpack_exports__);
 const {
   state,
   actions
-} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('create-block', {
+} = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.store)('mosne-speech-to-text-block', {
   state: {
     isPlaying: false,
     currentVoice: null,
@@ -95,7 +95,18 @@ const {
     },
     createUtterance() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
-      const content = document.querySelector('main')?.innerText || '';
+
+      // grab all the text content from the page inside the main element exclude recursivelly the text inside the class skip-speach
+      let content = '';
+      let cloneMain = document.querySelector('main').cloneNode(true);
+      if (cloneMain) {
+        const skip = cloneMain.querySelectorAll('.skip-speach');
+        skip.forEach(el => {
+          el.remove();
+        });
+        content = cloneMain.textContent;
+        cloneMain = null;
+      }
       const newUtterance = new SpeechSynthesisUtterance(content);
       newUtterance.lang = document.documentElement.lang;
       if (context.currentVoice) {
@@ -155,6 +166,7 @@ const {
     init() {
       // Initialize voices when available
       if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
         actions.loadVoices();
         //console.log('init1');
         if (window.speechSynthesis.onvoiceschanged !== undefined) {

@@ -1,7 +1,7 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "create-block/mosne-speech-to-text-block",
+	"name": "mosne/speech-to-text",
 	"version": "0.1.0",
 	"title": "Mosne Speech To Text Block",
 	"category": "widgets",

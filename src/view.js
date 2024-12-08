@@ -3,7 +3,7 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 
-const { state, actions } = store( 'create-block', {
+const { state, actions } = store( 'mosne-speech-to-text-block', {
 	state: {
 		isPlaying: false,
 		currentVoice: null,
@@ -35,7 +35,19 @@ const { state, actions } = store( 'create-block', {
 		},
 		createUtterance() {
 			const context = getContext();
-			const content = document.querySelector( 'main' )?.innerText || '';
+
+			// grab all the text content from the page inside the main element exclude recursivelly the text inside the class skip-speach
+			let content = '';
+			let cloneMain = document.querySelector( 'main' ).cloneNode( true );
+			if ( cloneMain ) {
+				const skip = cloneMain.querySelectorAll( '.skip-speach' );
+				skip.forEach( ( el ) => {
+					el.remove();
+				} );
+				content = cloneMain.textContent;
+				cloneMain = null;
+			}
+
 			const newUtterance = new SpeechSynthesisUtterance( content );
 			newUtterance.lang = document.documentElement.lang;
 
@@ -99,6 +111,7 @@ const { state, actions } = store( 'create-block', {
 		init() {
 			// Initialize voices when available
 			if ( window.speechSynthesis ) {
+				window.speechSynthesis.cancel();
 				actions.loadVoices();
 				//console.log('init1');
 				if ( window.speechSynthesis.onvoiceschanged !== undefined ) {

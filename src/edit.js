@@ -30,10 +30,12 @@ export default function Edit( { attributes, setAttributes } ) {
 
 	return (
 		<div { ...blockProps }>
+			<h2>{ __( 'Speech to Text', 'mosne-speech-to-text-block' ) }</h2>
 			<button>{ __( 'Play', 'mosne-speech-to-text-block' ) }</button>
-			<select>
+			<label htmlFor="voices">{ __( 'Voice', 'mosne-speech-to-text-block' ) }</label>
+			<select id="voices">
 				<option value="">
-					{ __( 'Selecte a voice', 'mosne-speech-to-text-block' ) }
+					{ __( 'Select a voice', 'mosne-speech-to-text-block' ) }
 				</option>
 			</select>
 		</div>

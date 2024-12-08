@@ -1,6 +1,6 @@
 <div
-	<?php echo get_block_wrapper_attributes(); ?>
-	data-wp-interactive="create-block"
+	<?php echo get_block_wrapper_attributes(array("class"=>"skip-speach")); ?>
+	data-wp-interactive="mosne-speech-to-text-block"
 	data-wp-init="callbacks.init"
 	<?php echo wp_interactivity_data_wp_context( 
 		[
