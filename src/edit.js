@@ -11,7 +11,7 @@ import { __ } from '@wordpress/i18n';
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { useBlockProps } from '@wordpress/block-editor';
+import { RichText, useBlockProps } from '@wordpress/block-editor';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -27,19 +27,49 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 export default function Edit( { attributes, setAttributes } ) {
 	const blockProps = useBlockProps();
+	const { label } = attributes;
 
 	return (
 		<div { ...blockProps }>
-			<h2>{ __( 'Speech to Text', 'mosne-speech-to-text-block' ) }</h2>
-			<button>{ __( 'Play', 'mosne-speech-to-text-block' ) }</button>
-			<label htmlFor="voices">
-				{ __( 'Voice', 'mosne-speech-to-text-block' ) }
-			</label>
-			<select id="voices">
-				<option value="">
-					{ __( 'Select a voice', 'mosne-speech-to-text-block' ) }
-				</option>
-			</select>
+			<RichText
+				tagName="p"
+				className="wp-block-mosne-speech-to-text__title"
+				allowedFormats={ [ 'core/image', 'core/italic', 'core/bold' ] }
+				value={ label }
+				placeholder={ __(
+					'Listen to this article',
+					'mosne-speech-to-text-block'
+				) }
+				onChange={ ( content ) => {
+					setAttributes( { label: content } );
+				} }
+			/>
+			<div className="wp-block-mosne-speech-to-text__content">
+				<div className="wp-block-mosne-speech-to-text__controls">
+					<button className="wp-block-mosne-speech-to-text__button wp-element-button">
+						{ __( 'Play', 'mosne-speech-to-text-block' ) }
+					</button>
+				</div>
+				<div className="wp-block-mosne-speech-to-text__voices">
+					<label
+						htmlFor="voices"
+						className="wp-block-mosne-speech-to-text__label"
+					>
+						{ __( 'Voice', 'mosne-speech-to-text-block' ) }
+					</label>
+					<select
+						id="voices"
+						className="wp-block-mosne-speech-to-text__select"
+					>
+						<option value="">
+							{ __(
+								'Select a voice',
+								'mosne-speech-to-text-block'
+							) }
+						</option>
+					</select>
+				</div>
+			</div>
 		</div>
 	);
 }

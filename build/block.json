@@ -5,12 +5,57 @@
   "version": "0.1.0",
   "title": "Mosne Speech To Text Block",
   "category": "widgets",
-  "icon": "media-interactive",
+  "icon": "microphone",
   "description": "An interactive block with the Interactivity API.",
   "example": {},
   "supports": {
     "interactivity": true,
-    "multiple": false
+    "multiple": false,
+    "ariaLabel": true,
+    "align": true,
+    "color": {
+      "gradient": true
+    },
+    "fontSize": true,
+    "shadow": true,
+    "spacing": {
+      "padding": true,
+      "margin": true,
+      "blockGap": true
+    },
+    "typography": {
+      "lineHeight": true,
+      "letterSpacing": true,
+      "textTransform": true,
+      "fontFamily": true,
+      "fontWeights": true,
+      "fontStyle": true,
+      "textAlign": true
+    },
+    "dimensions": {
+      "aspectRatio": true,
+      "minHeight": true
+    },
+    "position": {
+      "sticky": true
+    },
+    "className": true,
+    "customClassName": true,
+    "anchor": true,
+    "background": {
+      "backgroundSize": true,
+      "backgroundImage": true
+    },
+    "border": {
+      "all": true,
+      "radius": true,
+      "style": true
+    }
+  },
+  "attributes": {
+    "label": {
+      "type": "string"
+    }
   },
   "textdomain": "mosne-speech-to-text-block",
   "editorScript": "file:./index.js",

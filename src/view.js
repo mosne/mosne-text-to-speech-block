@@ -12,7 +12,7 @@ const { actions } = store( 'mosne-speech-to-text-block', {
 	},
 	actions: {
 		async loadVoices() {
-			console.log( 'loadVoices' );
+			// console.log( 'loadVoices' );
 			const context = getContext();
 			const availableVoices = window.speechSynthesis.getVoices();
 			// console.log( 'voices', availableVoices );
@@ -32,8 +32,8 @@ const { actions } = store( 'mosne-speech-to-text-block', {
 			if ( localVoices.length > 0 ) {
 				context.voices = localVoices;
 				context.currentVoice = localVoices[ 0 ];
-				console.log( 'current', context.currentVoice );
-				console.log( 'voices', context.voices );
+				//	console.log( 'current', context.currentVoice );
+				//	console.log( 'voices', context.voices );
 			}
 			// Create initial utterance
 			actions.createUtterance();
@@ -46,7 +46,7 @@ const { actions } = store( 'mosne-speech-to-text-block', {
 			newUtterance.lang = document.documentElement.lang;
 
 			if ( context.currentVoice ) {
-			//	console.log( 'voice', context.currentVoice );
+				//	console.log( 'voice', context.currentVoice );
 				newUtterance.voice = context.currentVoice;
 			}
 
