@@ -12,27 +12,37 @@
 >
 	<button
 		data-wp-on--click="actions.Play"
-		data-wp--hide="state.isPlaying"
+		data-wp-bind--hidden="context.isPlaying"
 	>
 	<?php esc_html_e( 'Play', 'mosne-speech-to-text-block' ); ?>
 	</button>
+
 	<button
 		data-wp-on--click="actions.Pause"
-		data-wp--hide="!state.isPlaying"
+		data-wp-bind--hidden="!context.isPlaying"
 	>
 	<?php esc_html_e( 'Pause', 'mosne-speech-to-text-block' ); ?>
 	</button>
+
+	<button
+		data-wp-on--click="actions.Restart"
+		data-wp-bind--hidden="!context.isPlaying"
+	>
+	<?php esc_html_e( 'Restart', 'mosne-speech-to-text-block' ); ?>
+	</button>
+	<label>
+		<?php esc_html_e( 'Voices', 'mosne-speech-to-text-block' ); ?>
+	</label>
 	<select
 	data-wp-on--change="actions.changeVoice"
 	data-wp-context='{ "voices" }'>
 	>
-		<option value=""><?php esc_html_e( 'Select a voice', 'mosne-speech-to-text-block' ); ?></option>
 		<template data-wp-each--voice="context.voices">
         	<option
 			data-wp-text="context.voice.voiceURI"
 			data-wp-key="context.voice.voiceURI"
 			data-wp-bind--value="context.voice.voiceURI"
-			data-wp-bind--selected="context.voice.voiceURI === context.currentVoice"
+			data-wp-bind--selected="callbacks.isSelected"
 			></option>
     	</template>
 	</select>

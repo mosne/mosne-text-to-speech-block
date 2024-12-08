@@ -70,19 +70,11 @@ const {
     isPlaying: false,
     currentVoice: null,
     utterance: null,
-    voices: [],
-    get availableVoices() {
-      return this.voices;
-    },
-    get currentVoiceURI() {
-      return this.currentVoice?.voiceURI;
-    },
-    get isPlaying() {
-      return this.isPlaying;
-    }
+    voices: []
   },
   actions: {
-    loadVoices() {
+    async loadVoices() {
+      console.log('loadVoices');
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       const availableVoices = window.speechSynthesis.getVoices();
       context.voices = availableVoices;
@@ -91,9 +83,13 @@ const {
       const currentLocale = document.documentElement.lang;
 
       // Set default French voice or first available
-      const localVoice = availableVoices.find(voice => voice.lang.startsWith(currentLocale)) || availableVoices[0];
-      context.currentVoice = localVoice;
-
+      const localVoices = availableVoices.filter(voice => voice.lang.startsWith(currentLocale));
+      if (localVoices.length > 0) {
+        context.voices = localVoices;
+        context.currentVoice = localVoices[0];
+        console.log('current', context.currentVoice);
+        console.log('voices', context.voices);
+      }
       // Create initial utterance
       actions.createUtterance();
     },
@@ -103,13 +99,26 @@ const {
       const newUtterance = new SpeechSynthesisUtterance(content);
       newUtterance.lang = document.documentElement.lang;
       if (context.currentVoice) {
+        console.log('voice', context.currentVoice);
         newUtterance.voice = context.currentVoice;
       }
       context.utterance = newUtterance;
+      console.log('utterance', context.utterance);
+    },
+    upadateUtterance() {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      const utterance = context.utterance;
+      if (utterance) {
+        window.speechSynthesis.cancel();
+        utterance.voice = context.currentVoice;
+        console.log('changed', utterance);
+      }
     },
     Play() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = true;
+      window.speechSynthesis.speak(context.utterance);
+      console.log('play', context.utterance);
       // init speach to text
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
@@ -118,6 +127,7 @@ const {
       }
     },
     Pause() {
+      console.log('pause');
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = false;
       window.speechSynthesis.pause();
@@ -128,7 +138,8 @@ const {
       const voice = context.voices.find(v => v.voiceURI === e.target.value);
       if (voice) {
         context.currentVoice = voice;
-        actions.createUtterance();
+        console.log('change', context.currentVoice);
+        actions.upadateUtterance();
       }
     }
   },
@@ -137,10 +148,17 @@ const {
       // Initialize voices when available
       if (window.speechSynthesis) {
         actions.loadVoices();
+        console.log('init1');
         if (window.speechSynthesis.onvoiceschanged !== undefined) {
           window.speechSynthesis.onvoiceschanged = actions.loadVoices;
+          console.log('init2');
         }
       }
+    },
+    isSelected() {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      console.log('isSelected', context.voice.voiceURI, context.currentVoice.voiceURI);
+      return context.voice.voiceURI === context.currentVoice.voiceURI;
     }
   }
 });
