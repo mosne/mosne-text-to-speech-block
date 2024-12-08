@@ -111,34 +111,42 @@ const {
       if (utterance) {
         window.speechSynthesis.cancel();
         utterance.voice = context.currentVoice;
-        console.log('changed', utterance);
+        context.isPlaying = false;
+        // console.log('changed',utterance);
       }
     },
     Play() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = true;
-      window.speechSynthesis.speak(context.utterance);
       console.log('play', context.utterance);
+      console.log('status', window.speechSynthesis);
       // init speach to text
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
       } else if (context.utterance) {
+        window.speechSynthesis.cancel();
         window.speechSynthesis.speak(context.utterance);
       }
     },
     Pause() {
-      console.log('pause');
+      //console.log('pause');
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = false;
       window.speechSynthesis.pause();
       // pause speach to text
+    },
+    Restart() {
+      //console.log('pause');
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      context.isPlaying = false;
+      window.speechSynthesis.cancel();
     },
     changeVoice(e) {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       const voice = context.voices.find(v => v.voiceURI === e.target.value);
       if (voice) {
         context.currentVoice = voice;
-        console.log('change', context.currentVoice);
+        // console.log('change',context.currentVoice);
         actions.upadateUtterance();
       }
     }
@@ -148,16 +156,16 @@ const {
       // Initialize voices when available
       if (window.speechSynthesis) {
         actions.loadVoices();
-        console.log('init1');
+        //console.log('init1');
         if (window.speechSynthesis.onvoiceschanged !== undefined) {
           window.speechSynthesis.onvoiceschanged = actions.loadVoices;
-          console.log('init2');
+          //console.log('init2');
         }
       }
     },
     isSelected() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
-      console.log('isSelected', context.voice.voiceURI, context.currentVoice.voiceURI);
+      //console.log('isSelected',context.voice.voiceURI, context.currentVoice.voiceURI);
       return context.voice.voiceURI === context.currentVoice.voiceURI;
     }
   }

@@ -39,7 +39,7 @@
 	>
 		<template data-wp-each--voice="context.voices">
         	<option
-			data-wp-text="context.voice.voiceURI"
+			data-wp-text="context.voice.name"
 			data-wp-key="context.voice.voiceURI"
 			data-wp-bind--value="context.voice.voiceURI"
 			data-wp-bind--selected="callbacks.isSelected"
