@@ -1,12 +1,12 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "mosne/speech-to-text",
+	"name": "mosne/text-to-speech",
 	"version": "0.1.0",
-	"title": "Mosne Speech To Text Block",
+	"title": "Mosne Text to Speech",
 	"category": "widgets",
 	"icon": "microphone",
-	"description": "An interactive block with the Interactivity API.",
+	"description": "Read the content of of a page using native Speech Synthesis and  Interactivity API.",
 	"example": {},
 	"supports": {
 		"interactivity": true,
@@ -57,7 +57,7 @@
 			"type": "string"
 		}
 	},
-	"textdomain": "mosne-speech-to-text-block",
+	"textdomain": "mosne-text-to-speech",
 	"editorScript": "file:./index.js",
 	"editorStyle": "file:./index.css",
 	"style": "file:./style-index.css",

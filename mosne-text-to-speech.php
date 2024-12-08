@@ -29,7 +29,7 @@ function mosne_text_to_speach_init() {
 
 	// Register block styles
 	register_block_style(
-			'mosne/speech-to-text',
+			'mosne/text-to-speech',
 			 [
 				'name'         => 'minimal',
 				'label'        => 'Minimal',

@@ -33,38 +33,38 @@ export default function Edit( { attributes, setAttributes } ) {
 		<div { ...blockProps }>
 			<RichText
 				tagName="p"
-				className="wp-block-mosne-speech-to-text__title"
+				className="wp-block-mosne-text-to-speech__title"
 				allowedFormats={ [ 'core/image', 'core/italic', 'core/bold' ] }
 				value={ label }
 				placeholder={ __(
 					'Listen to this article',
-					'mosne-speech-to-text-block'
+					'mosne-text-to-speech'
 				) }
 				onChange={ ( content ) => {
 					setAttributes( { label: content } );
 				} }
 			/>
-			<div className="wp-block-mosne-speech-to-text__content">
-				<div className="wp-block-mosne-speech-to-text__controls">
-					<button className="wp-block-mosne-speech-to-text__button wp-element-button">
-						{ __( 'Play', 'mosne-speech-to-text-block' ) }
+			<div className="wp-block-mosne-text-to-speech__content">
+				<div className="wp-block-mosne-text-to-speech__controls">
+					<button className="wp-block-mosne-text-to-speech__button wp-element-button">
+						{ __( 'Play', 'mosne-text-to-speech' ) }
 					</button>
 				</div>
-				<div className="wp-block-mosne-speech-to-text__voices">
+				<div className="wp-block-mosne-text-to-speech__voices">
 					<label
 						htmlFor="voices"
-						className="wp-block-mosne-speech-to-text__label"
+						className="wp-block-mosne-text-to-speech__label"
 					>
-						{ __( 'Voice', 'mosne-speech-to-text-block' ) }
+						{ __( 'Voice', 'mosne-text-to-speech' ) }
 					</label>
 					<select
 						id="voices"
-						className="wp-block-mosne-speech-to-text__select"
+						className="wp-block-mosne-text-to-speech__select"
 					>
 						<option value="">
 							{ __(
 								'Select a voice',
-								'mosne-speech-to-text-block'
+								'mosne-text-to-speech'
 							) }
 						</option>
 					</select>

@@ -3,7 +3,7 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 
-const { actions } = store( 'mosne-speech-to-text-block', {
+const { actions } = store( 'mosne-text-to-speech-block', {
 	state: {
 		isPlaying: false,
 		currentVoice: null,
@@ -104,7 +104,7 @@ const { actions } = store( 'mosne-speech-to-text-block', {
 			let content = '';
 			let cloneMain = document.querySelector( 'main' ).cloneNode( true );
 			if ( cloneMain ) {
-				const skip = cloneMain.querySelectorAll( '.skip-speach' );
+				const skip = cloneMain.querySelectorAll( '.skip-speech' );
 				skip.forEach( ( el ) => {
 					el.remove();
 				} );
