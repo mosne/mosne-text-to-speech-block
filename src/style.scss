@@ -6,28 +6,41 @@
  */
 
 .wp-block-mosne-speech-to-text {
+
 	&.has-background {
 		padding: 1rem;
 	}
+
 	&__title {
+		margin-top: 0;
 		margin-bottom: 1rem;
 	}
+
 	&__content {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		align-items: center;
-		gap: .75rem;
+		gap: 1rem;
 	}
+
 	&__controls {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
 		gap: .5rem;
 	}
+
+	&__button {
+		&.wp-element-button {
+			padding: .5rem 1rem;
+		}
+	}
+
 	&__label {
 		margin-right: 1rem;
 	}
+
 	&__select {
 		font-family: inherit;
 		font-size: inherit;
