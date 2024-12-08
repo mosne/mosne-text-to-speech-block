@@ -24,7 +24,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @see https://developer.wordpress.org/reference/functions/register_block_type/
  */
-function create_block_mosne_speech_to_text_block_block_init() {
+function mosne_text_to_speach_init() {
 	register_block_type_from_metadata( __DIR__ . '/build' );
+
+	// Register block styles
+	register_block_style(
+			'mosne/speech-to-text',
+			 [
+				'name'         => 'minimal',
+				'label'        => 'Minimal',
+			]
+	);
 }
-add_action( 'init', 'create_block_mosne_speech_to_text_block_block_init' );
+add_action( 'init', 'mosne_text_to_speach_init' );

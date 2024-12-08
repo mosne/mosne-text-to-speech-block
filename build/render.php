@@ -42,7 +42,7 @@
 	</div>
 	<div class="wp-block-mosne-speech-to-text__voices">
 	<label class="wp-block-mosne-speech-to-text__label">
-		<?php esc_html_e( 'Voices', 'mosne-speech-to-text-block' ); ?>
+		<?php esc_html_e( 'Voice', 'mosne-speech-to-text-block' ); ?>
 	</label>
 	<select
 	class="wp-block-mosne-speech-to-text__select"

@@ -7,6 +7,8 @@
 
 .wp-block-mosne-speech-to-text {
 
+	$el : &;
+
 	&.has-background {
 		padding: 1rem;
 	}
@@ -38,12 +40,35 @@
 	}
 
 	&__label {
-		margin-right: 1rem;
+		margin-right: .5rem;
 	}
 
 	&__select {
 		font-family: inherit;
 		font-size: inherit;
 		font-weight: inherit;
+		background: transparent;
+		border: 0;
+		border-bottom: 1px solid currentColor;
+	}
+
+	&.is-style-minimal{
+
+		#{$el}__title {
+			// sr-only
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			padding: 0;
+			margin: -1px;
+			overflow: hidden;
+			clip: rect(0, 0, 0, 0);
+			white-space: nowrap;
+			border: 0;
+		}
+
+		#{$el}__voices {
+			display: none;
+		}
 	}
 }
