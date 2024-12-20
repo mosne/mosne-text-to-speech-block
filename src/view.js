@@ -105,13 +105,13 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 		},
 		changeSpeed( e ) {
 			const context = getContext();
-				context.currentSpeed = e.target.value;
-				actions.upadateUtterance();
+			context.currentSpeed = e.target.value;
+			actions.upadateUtterance();
 		},
 		changePitch( e ) {
 			const context = getContext();
-				context.currentPitch = e.target.value;
-				actions.upadateUtterance();
+			context.currentPitch = e.target.value;
+			actions.upadateUtterance();
 		},
 		toggleSettings() {
 			const context = getContext();
