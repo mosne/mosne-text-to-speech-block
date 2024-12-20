@@ -1,3 +1,6 @@
+<?php
+$block_title = $attributes['label'] ?? '';
+?>
 <div
 	<?php echo get_block_wrapper_attributes( array( "class" => "skip-speech" ) ); ?>
 		data-wp-interactive="mosne-text-to-speech-block"
@@ -13,9 +16,11 @@
 	);
 	?>
 >
-	<div class="wp-block-mosne-text-to-speech__title">
-		<?php echo wp_kses_post( $attributes['label'] ); ?>
-	</div>
+	<?php if(!empty($block_title)): ?>
+		<div class="wp-block-mosne-text-to-speech__title">
+			<?php echo wp_kses_post( $block_title ); ?>
+		</div>
+	<?php endif; ?>
 	<div class="wp-block-mosne-text-to-speech__content">
 		<div class="wp-block-mosne-text-to-speech__controls">
 
@@ -24,7 +29,12 @@
 					data-wp-on--click="actions.Play"
 					data-wp-bind--hidden="context.isPlaying"
 			>
-				<?php esc_html_e( 'Play', 'mosne-text-to-speech' ); ?>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+				</svg>
+				<span>
+					<?php esc_html_e( 'Play', 'mosne-text-to-speech' ); ?>
+				</span>
 			</button>
 
 			<button
@@ -32,7 +42,12 @@
 					data-wp-on--click="actions.Pause"
 					data-wp-bind--hidden="!context.isPlaying"
 			>
-				<?php esc_html_e( 'Pause', 'mosne-text-to-speech' ); ?>
+				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="size-6">
+					<path fill-rule="evenodd" d="M6.75 5.25a.75.75 0 0 1 .75-.75H9a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H7.5a.75.75 0 0 1-.75-.75V5.25Zm7.5 0A.75.75 0 0 1 15 4.5h1.5a.75.75 0 0 1 .75.75v13.5a.75.75 0 0 1-.75.75H15a.75.75 0 0 1-.75-.75V5.25Z" clip-rule="evenodd" />
+				</svg>
+				<span>
+					<?php esc_html_e( 'Pause', 'mosne-text-to-speech' ); ?>
+				</span>
 			</button>
 
 			<button
@@ -40,14 +55,24 @@
 					data-wp-on--click="actions.Restart"
 					data-wp-bind--hidden="!context.isPlaying"
 			>
-				<?php esc_html_e( 'Restart', 'mosne-text-to-speech' ); ?>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M21 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061A1.125 1.125 0 0 1 21 8.689v8.122ZM11.25 16.811c0 .864-.933 1.406-1.683.977l-7.108-4.061a1.125 1.125 0 0 1 0-1.954l7.108-4.061a1.125 1.125 0 0 1 1.683.977v8.122Z" />
+				</svg>
+				<span>
+					<?php esc_html_e( 'Restart', 'mosne-text-to-speech' ); ?>
+				</span>
 			</button>
 
 			<button
 					class="wp-block-mosne-text-to-speech__button wp-element-button"
 					data-wp-on--click="actions.toggleSettings"
 			>
+				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/>
+				</svg>
+				<span>
 				<?php esc_html_e( 'Settings', 'mosne-text-to-speech' ); ?>
+				</span>
 			</button>
 		</div>
 

@@ -55,6 +55,10 @@
   "attributes": {
     "label": {
       "type": "string"
+    },
+    "hasIcon": {
+      "type": "boolean",
+      "default": true
     }
   },
   "textdomain": "mosne-text-to-speech",
