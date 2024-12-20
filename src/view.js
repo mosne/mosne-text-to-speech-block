@@ -9,6 +9,8 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 		currentVoice: null,
 		utterance: null,
 		voices: [],
+		currentSpeed: 1,
+		currentPitch: 1,
 	},
 	actions: {
 		async loadVoices() {
@@ -44,9 +46,10 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 
 			const newUtterance = new SpeechSynthesisUtterance( content );
 			newUtterance.lang = document.documentElement.lang;
+			newUtterance.rate = context.currentSpeed;
+			newUtterance.pitch = context.currentPitch;
 
 			if ( context.currentVoice ) {
-				//	console.log( 'voice', context.currentVoice );
 				newUtterance.voice = context.currentVoice;
 			}
 
@@ -90,6 +93,7 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 		},
 		changeVoice( e ) {
 			const context = getContext();
+			context.isPlaying = false;
 			const voice = context.voices.find(
 				( v ) => v.voiceURI === e.target.value
 			);
@@ -98,6 +102,20 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 				// console.log('change',context.currentVoice);
 				actions.upadateUtterance();
 			}
+		},
+		changeSpeed( e ) {
+			const context = getContext();
+				context.currentSpeed = e.target.value;
+				actions.upadateUtterance();
+		},
+		changePitch( e ) {
+			const context = getContext();
+				context.currentPitch = e.target.value;
+				actions.upadateUtterance();
+		},
+		toggleSettings() {
+			const context = getContext();
+			context.showSettings = ! context.showSettings;
 		},
 		getContent() {
 			// grab all the text content from the page inside the main element exclude recursivelly the text inside the class skip-speach

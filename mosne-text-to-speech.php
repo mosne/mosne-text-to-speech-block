@@ -26,14 +26,5 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function mosne_text_to_speach_init() {
 	register_block_type_from_metadata( __DIR__ . '/build' );
-
-	// Register block styles
-	register_block_style(
-			'mosne/text-to-speech',
-			 [
-				'name'         => 'minimal',
-				'label'        => 'Minimal',
-			]
-	);
 }
 add_action( 'init', 'mosne_text_to_speach_init' );

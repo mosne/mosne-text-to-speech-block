@@ -1,1 +1,58 @@
-.wp-block-mosne-text-to-speech.has-background{padding:1rem}.wp-block-mosne-text-to-speech__title{margin-bottom:1rem;margin-top:0}.wp-block-mosne-text-to-speech__content{align-items:center;display:flex;flex-wrap:wrap;gap:1rem;justify-content:space-between}.wp-block-mosne-text-to-speech__controls{display:flex;flex-wrap:wrap;gap:.5rem;justify-content:center}.wp-block-mosne-text-to-speech__button.wp-element-button{padding:.5rem 1rem}.wp-block-mosne-text-to-speech__label{margin-left:.5rem}.wp-block-mosne-text-to-speech__select{background:transparent;border:0;border-bottom:1px solid;font-family:inherit;font-size:inherit;font-weight:inherit}.wp-block-mosne-text-to-speech.is-style-minimal .wp-block-mosne-text-to-speech__title{height:1px;margin:-1px;overflow:hidden;padding:0;position:absolute;width:1px;clip:rect(0,0,0,0);border:0;white-space:nowrap}.wp-block-mosne-text-to-speech.is-style-minimal .wp-block-mosne-text-to-speech__voices{display:none}
+/*!***************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/style.scss ***!
+  \***************************************************************************************************************************************************************************************************************************************/
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+.wp-block-mosne-text-to-speech.has-background {
+  padding: 1rem;
+}
+.wp-block-mosne-text-to-speech__title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+.wp-block-mosne-text-to-speech__content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+.wp-block-mosne-text-to-speech__controls {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.wp-block-mosne-text-to-speech__button.wp-element-button {
+  padding: 0.5rem 1rem;
+}
+.wp-block-mosne-text-to-speech__label {
+  margin-left: 0.5rem;
+}
+.wp-block-mosne-text-to-speech__select {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  border-bottom: 1px solid currentColor;
+}
+.wp-block-mosne-text-to-speech.is-style-minimal .wp-block-mosne-text-to-speech__title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.wp-block-mosne-text-to-speech.is-style-minimal .wp-block-mosne-text-to-speech__voices {
+  display: none;
+}

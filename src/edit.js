@@ -62,10 +62,7 @@ export default function Edit( { attributes, setAttributes } ) {
 						className="wp-block-mosne-text-to-speech__select"
 					>
 						<option value="">
-							{ __(
-								'Select a voice',
-								'mosne-text-to-speech'
-							) }
+							{ __( 'Select a voice', 'mosne-text-to-speech' ) }
 						</option>
 					</select>
 				</div>
