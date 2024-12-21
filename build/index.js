@@ -67,29 +67,46 @@ function Edit({
           label: content
         });
       }
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
       className: "wp-block-mosne-text-to-speech__content",
-      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
         className: "wp-block-mosne-text-to-speech__controls",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
           className: "wp-block-mosne-text-to-speech__button wp-element-button",
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Play', 'mosne-text-to-speech')
-        })
-      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "wp-block-mosne-text-to-speech__voices",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("label", {
-          htmlFor: "voices",
-          className: "wp-block-mosne-text-to-speech__label",
-          children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Voice', 'mosne-text-to-speech')
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("select", {
-          id: "voices",
-          className: "wp-block-mosne-text-to-speech__select",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("option", {
-            value: "",
-            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Select a voice', 'mosne-text-to-speech')
-          })
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
+            xmlns: "http://www.w3.org/2000/svg",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            "stroke-width": "1.5",
+            stroke: "currentColor",
+            class: "size-6",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round",
+              d: "M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Play', 'mosne-text-to-speech')
+          })]
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("button", {
+          className: "wp-block-mosne-text-to-speech__button wp-element-button",
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
+            xmlns: "http://www.w3.org/2000/svg",
+            fill: "none",
+            viewBox: "0 0 24 24",
+            "stroke-width": "1.5",
+            stroke: "currentColor",
+            class: "size-6",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
+              "stroke-linecap": "round",
+              "stroke-linejoin": "round",
+              d: "M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
+            })
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+            children: (0,_wordpress_i18n__WEBPACK_IMPORTED_MODULE_0__.__)('Settings', 'mosne-text-to-speech')
+          })]
         })]
-      })]
+      })
     })]
   });
 }
@@ -203,7 +220,7 @@ module.exports = window["wp"]["i18n"];
   \************************/
 /***/ ((module) => {
 
-module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"mosne/text-to-speech","version":"0.1.0","title":"Mosne Text to Speech","category":"widgets","icon":"microphone","description":"Read the content of of a page using native Speech Synthesis and  Interactivity API.","example":{},"supports":{"interactivity":true,"multiple":false,"ariaLabel":true,"align":true,"color":{"gradient":true},"fontSize":true,"shadow":true,"spacing":{"padding":true,"margin":true,"blockGap":true},"typography":{"lineHeight":true,"letterSpacing":true,"textTransform":true,"fontFamily":true,"fontWeights":true,"fontStyle":true,"textAlign":true},"dimensions":{"aspectRatio":true,"minHeight":true},"position":{"sticky":true},"className":true,"customClassName":true,"anchor":true,"background":{"backgroundSize":true,"backgroundImage":true},"border":{"all":true,"radius":true,"style":true}},"attributes":{"label":{"type":"string"},"hasIcon":{"type":"boolean","default":true}},"textdomain":"mosne-text-to-speech","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","render":"file:./render.php","viewScriptModule":"file:./view.js"}');
+module.exports = /*#__PURE__*/JSON.parse('{"$schema":"https://schemas.wp.org/trunk/block.json","apiVersion":3,"name":"mosne/text-to-speech","version":"0.1.0","title":"Mosne Text to Speech","category":"widgets","icon":"microphone","description":"Read the content of of a page using native Speech Synthesis and  Interactivity API.","example":{},"supports":{"interactivity":true,"multiple":false,"ariaLabel":true,"align":true,"color":{"gradient":true},"fontSize":true,"shadow":true,"spacing":{"padding":true,"margin":true,"blockGap":["horizontal","vertical"]},"typography":{"lineHeight":true,"letterSpacing":true,"textTransform":true,"fontFamily":true,"fontWeights":true,"fontStyle":true,"textAlign":true},"dimensions":{"aspectRatio":true,"minHeight":true},"position":{"sticky":true},"className":true,"customClassName":true,"anchor":true,"background":{"backgroundSize":true,"backgroundImage":true},"border":{"all":true,"radius":true,"style":true}},"attributes":{"label":{"type":"string"},"hasIcon":{"type":"boolean","default":true}},"textdomain":"mosne-text-to-speech","editorScript":"file:./index.js","editorStyle":"file:./index.css","style":"file:./style-index.css","render":"file:./render.php","viewScriptModule":"file:./view.js"}');
 
 /***/ })
 

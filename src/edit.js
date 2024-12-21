@@ -47,24 +47,19 @@ export default function Edit( { attributes, setAttributes } ) {
 			<div className="wp-block-mosne-text-to-speech__content">
 				<div className="wp-block-mosne-text-to-speech__controls">
 					<button className="wp-block-mosne-text-to-speech__button wp-element-button">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z" />
+					</svg>
+						<span>
 						{ __( 'Play', 'mosne-text-to-speech' ) }
+						</span>
 					</button>
-				</div>
-				<div className="wp-block-mosne-text-to-speech__voices">
-					<label
-						htmlFor="voices"
-						className="wp-block-mosne-text-to-speech__label"
-					>
-						{ __( 'Voice', 'mosne-text-to-speech' ) }
-					</label>
-					<select
-						id="voices"
-						className="wp-block-mosne-text-to-speech__select"
-					>
-						<option value="">
-							{ __( 'Select a voice', 'mosne-text-to-speech' ) }
-						</option>
-					</select>
+					<button className="wp-block-mosne-text-to-speech__button wp-element-button">
+					<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+					<path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"/>
+				</svg>
+					<span>{ __( 'Settings', 'mosne-text-to-speech' ) }</span>
+					</button>
 				</div>
 			</div>
 		</div>

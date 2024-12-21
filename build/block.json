@@ -21,7 +21,10 @@
     "spacing": {
       "padding": true,
       "margin": true,
-      "blockGap": true
+      "blockGap": [
+        "horizontal",
+        "vertical"
+      ]
     },
     "typography": {
       "lineHeight": true,

@@ -37,17 +37,7 @@
 }
 .wp-block-mosne-text-to-speech__select {
   font-family: inherit;
-  font-size: inherit;
   font-weight: inherit;
-  color: inherit;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  appearance: none;
-  background: url("data:image/svg+xml;utf8,<svg xmlns=%27http://www.w3.org/2000/svg%27 width=%27100%27 height=%27100%27 fill=%27%23888888%27><polygon points=%270,0 100,0 50,50%27/></svg>") no-repeat;
-  background-size: 12px;
-  background-position: calc(100% - 12px) calc(50% + 2px);
-  background-repeat: no-repeat;
-  background-color: inherit;
   padding: 0.25em 1.5em 0.25em 0.5em;
 }
 .wp-block-mosne-text-to-speech__settings {
