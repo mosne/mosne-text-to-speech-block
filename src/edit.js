@@ -31,8 +31,11 @@ import {
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const blockProps = useBlockProps();
+	
 	const { label,classOptions } = attributes;
+	const blockProps = useBlockProps( {
+		className: classOptions,
+	} );
 
 	return (
 
