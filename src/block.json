@@ -56,9 +56,9 @@
 		"label": {
 			"type": "string"
 		},
-		"hasIcon": {
-			"type": "boolean",
-			"default": true
+		"classOptions": {
+			"type": "string",
+			"default": "has-icon has-label"
 		}
 	},
 	"textdomain": "mosne-text-to-speech",

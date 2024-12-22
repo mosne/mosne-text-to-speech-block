@@ -58,4 +58,22 @@
 			display: none;
 		}
 	}
+
+	&.has-icon.hide-label .wp-element-button{
+		position: relative;
+		//sr-only
+		span {
+		position: absolute;
+		clip: rect(1px, 1px, 1px, 1px);
+		clip-path: inset(50%);
+		height: 1px;
+		width: 1px;
+		overflow: hidden;
+		white-space: nowrap;
+		}
+	}
+
+	&.has-label.hide-icon .wp-element-button svg {
+		display: none;
+	}
 }

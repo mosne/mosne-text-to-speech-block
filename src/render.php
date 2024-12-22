@@ -1,8 +1,9 @@
 <?php
-$block_title = $attributes['label'] ?? '';
+$block_title 	= $attributes['label'] ?? '';
+$class_options  = $attributes['classOptions'] ?? '';
 ?>
 <div
-	<?php echo get_block_wrapper_attributes( array( "class" => "skip-speech" ) ); ?>
+	<?php echo get_block_wrapper_attributes( array( "class" => "skip-speech ".$class_options ) ); ?>
 		data-wp-interactive="mosne-text-to-speech-block"
 		data-wp-init="callbacks.init"
 	<?php echo wp_interactivity_data_wp_context(

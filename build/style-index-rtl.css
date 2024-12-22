@@ -48,3 +48,18 @@
 .wp-block-mosne-text-to-speech__settings[hidden] {
   display: none;
 }
+.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button {
+  position: relative;
+}
+.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button span {
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.wp-block-mosne-text-to-speech.has-label.hide-icon .wp-element-button svg {
+  display: none;
+}

@@ -11,7 +11,12 @@ import { __ } from '@wordpress/i18n';
  *
  * @see https://developer.wordpress.org/block-editor/reference-guides/packages/packages-block-editor/#useblockprops
  */
-import { RichText, useBlockProps } from '@wordpress/block-editor';
+import { RichText, useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	__experimentalToggleGroupControl as ToggleGroupControl, // eslint-disable-line
+	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
+	PanelBody,
+} from '@wordpress/components';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -27,9 +32,37 @@ import { RichText, useBlockProps } from '@wordpress/block-editor';
  */
 export default function Edit( { attributes, setAttributes } ) {
 	const blockProps = useBlockProps();
-	const { label } = attributes;
+	const { label,classOptions } = attributes;
 
 	return (
+
+		<>
+			<InspectorControls>
+				<PanelBody title={ __( 'Settings', 'mosne-text-to-speech' ) }>
+					<ToggleGroupControl
+						__nextHasNoMarginBottom
+						isBlock
+						value={ classOptions }
+						label={ __( 'Options', 'mosne-text-to-speech' ) }
+						onChange={ ( value ) =>
+							setAttributes( { classOptions: value } )
+						}
+					>
+						<ToggleGroupControlOption
+							label={ __( 'Icon', 'mosne-text-to-speech' ) }
+							value="has-icon hide-label"
+						/>
+						<ToggleGroupControlOption
+							label={ __( 'Label', 'mosne-text-to-speech' ) }
+							value="has-label hide-icon"
+						/>
+						<ToggleGroupControlOption
+							label={ __( 'Both', 'mosne-text-to-speech' ) }
+							value="has-icon has-label"
+						/>
+					</ToggleGroupControl>
+				</PanelBody>
+			</InspectorControls>
 		<div { ...blockProps }>
 			<RichText
 				tagName="p"
@@ -63,5 +96,6 @@ export default function Edit( { attributes, setAttributes } ) {
 				</div>
 			</div>
 		</div>
+		</>
 	);
 }
