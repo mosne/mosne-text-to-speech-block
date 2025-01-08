@@ -3,9 +3,9 @@
   "apiVersion": 3,
   "name": "mosne/text-to-speech",
   "version": "0.1.0",
-  "title": "Mosne Text to Speech",
+  "title": "Text to Speech",
   "category": "widgets",
-  "icon": "microphone",
+  "icon": "megaphone",
   "description": "Read the content of of a page using native Speech Synthesis and  Interactivity API.",
   "example": {},
   "supports": {

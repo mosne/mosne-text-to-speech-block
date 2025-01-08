@@ -14,28 +14,22 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 	},
 	actions: {
 		async loadVoices() {
-			// console.log( 'loadVoices' );
 			const context = getContext();
 			const availableVoices = window.speechSynthesis.getVoices();
-			// console.log( 'voices', availableVoices );
 			context.voices = availableVoices;
 			context.currentVoice = availableVoices[ 0 ];
 
 			// get current docuemtn locale
 			const currentLocale = document.documentElement.lang;
-			// console.log( 'currentLocale', currentLocale );
 
 			// Set default French voice or first available
 			const localVoices = availableVoices.filter( ( voice ) =>
 				voice.lang.startsWith( currentLocale )
 			);
 
-			console.log( 'localVoices', localVoices );
 			if ( localVoices.length > 0 ) {
 				context.voices = localVoices;
 				context.currentVoice = localVoices[ 0 ];
-				//	console.log( 'current', context.currentVoice );
-				//	console.log( 'voices', context.voices );
 			}
 			// Create initial utterance
 			actions.createUtterance();
@@ -51,10 +45,11 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 
 			if ( context.currentVoice ) {
 				newUtterance.voice = context.currentVoice;
+			} else {
+				console.warn( 'Current Voice not found' );
 			}
 
 			context.utterance = newUtterance;
-			//console.log( 'utterance', context.utterance );
 		},
 		upadateUtterance() {
 			const context = getContext();
@@ -63,30 +58,30 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 				window.speechSynthesis.cancel();
 				context.isPlaying = false;
 				actions.createUtterance();
+			} else {
+				console.warn( 'Utterance not found' );
 			}
 		},
 		Play() {
 			const context = getContext();
 			context.isPlaying = true;
-			// console.log( 'play', context.utterance );
-			// console.log( 'status', window.speechSynthesis );
+
 			// init speach to text
 			if ( window.speechSynthesis.paused ) {
 				window.speechSynthesis.resume();
 			} else if ( context.utterance ) {
 				window.speechSynthesis.cancel();
 				window.speechSynthesis.speak( context.utterance );
+			} else {
+				console.warn( 'Utterance not found' );
 			}
 		},
 		Pause() {
-			//console.log('pause');
 			const context = getContext();
 			context.isPlaying = false;
 			window.speechSynthesis.pause();
-			// pause speach to text
 		},
 		Restart() {
-			//console.log('pause');
 			const context = getContext();
 			context.isPlaying = false;
 			window.speechSynthesis.cancel();
@@ -97,10 +92,13 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 			const voice = context.voices.find(
 				( v ) => v.voiceURI === e.target.value
 			);
+			// Reset current utterance
+			window.speechSynthesis.cancel();
 			if ( voice ) {
 				context.currentVoice = voice;
-				// console.log('change',context.currentVoice);
 				actions.upadateUtterance();
+			} else {
+				console.warn( 'Voice not found' );
 			}
 		},
 		changeSpeed( e ) {
@@ -138,16 +136,13 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 			if ( window.speechSynthesis ) {
 				window.speechSynthesis.cancel();
 				actions.loadVoices();
-				//console.log('init1');
 				if ( window.speechSynthesis.onvoiceschanged !== undefined ) {
 					window.speechSynthesis.onvoiceschanged = actions.loadVoices;
-					//console.log('init2');
 				}
 			}
 		},
 		isSelected() {
 			const context = getContext();
-			//console.log('isSelected',context.voice.voiceURI, context.currentVoice.voiceURI);
 			return context.voice.voiceURI === context.currentVoice.voiceURI;
 		},
 	},
