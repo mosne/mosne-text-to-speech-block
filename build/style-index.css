@@ -1,1 +1,67 @@
-.wp-block-mosne-text-to-speech.has-background{padding:1rem}.wp-block-mosne-text-to-speech__title{margin-bottom:1rem;margin-top:0}.wp-block-mosne-text-to-speech__content{display:grid;gap:1rem}.wp-block-mosne-text-to-speech__button.wp-element-button{padding:.5rem 1rem;white-space:nowrap}.wp-block-mosne-text-to-speech__button.wp-element-button span,.wp-block-mosne-text-to-speech__button.wp-element-button svg{display:inline;vertical-align:middle}.wp-block-mosne-text-to-speech__button.wp-element-button svg{height:1.25em;margin-right:.25rem;width:1.25em}.wp-block-mosne-text-to-speech__label{margin-right:.5rem}.wp-block-mosne-text-to-speech__select{font-family:inherit;font-weight:inherit;padding:.25em 1.5em .25em .5em}.wp-block-mosne-text-to-speech__settings{display:grid;gap:.5rem;padding:1rem 0}.wp-block-mosne-text-to-speech__settings[hidden]{display:none}.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button{position:relative}.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button span{position:absolute;clip:rect(1px,1px,1px,1px);clip-path:inset(50%);height:1px;overflow:hidden;white-space:nowrap;width:1px}.wp-block-mosne-text-to-speech.has-label.hide-icon .wp-element-button svg{display:none}
+/*!***************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[4].use[1]!./node_modules/postcss-loader/dist/cjs.js??ruleSet[1].rules[4].use[2]!./node_modules/sass-loader/dist/cjs.js??ruleSet[1].rules[4].use[3]!./src/style.scss ***!
+  \***************************************************************************************************************************************************************************************************************************************/
+/**
+ * The following styles get applied both on the front of your site
+ * and in the editor.
+ *
+ * Replace them with your own styles or remove the file completely.
+ */
+.wp-block-mosne-text-to-speech.has-background {
+  padding: 1rem;
+}
+.wp-block-mosne-text-to-speech__title {
+  margin-top: 0;
+  margin-bottom: 1rem;
+}
+.wp-block-mosne-text-to-speech__content {
+  display: grid;
+  gap: 1rem;
+}
+.wp-block-mosne-text-to-speech__button.wp-element-button {
+  padding: 0.5rem 1rem;
+  white-space: nowrap;
+}
+.wp-block-mosne-text-to-speech__button.wp-element-button svg,
+.wp-block-mosne-text-to-speech__button.wp-element-button span {
+  vertical-align: middle;
+  display: inline;
+}
+.wp-block-mosne-text-to-speech__button.wp-element-button svg {
+  margin-right: 0.25rem;
+  width: 1.25em;
+  height: 1.25em;
+}
+.wp-block-mosne-text-to-speech__label {
+  margin-right: 0.5rem;
+}
+.wp-block-mosne-text-to-speech__select {
+  font-family: inherit;
+  font-weight: inherit;
+  padding: 0.25em 1.5em 0.25em 0.5em;
+}
+.wp-block-mosne-text-to-speech__settings {
+  display: grid;
+  gap: 0.5rem;
+  padding: 1rem 0;
+}
+.wp-block-mosne-text-to-speech__settings[hidden] {
+  display: none;
+}
+.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button {
+  position: relative;
+}
+.wp-block-mosne-text-to-speech.has-icon.hide-label .wp-element-button span {
+  position: absolute;
+  clip: rect(1px, 1px, 1px, 1px);
+  clip-path: inset(50%);
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.wp-block-mosne-text-to-speech.has-label.hide-icon .wp-element-button svg {
+  display: none;
+}
+
+/*# sourceMappingURL=style-index.css.map*/

@@ -3,14 +3,24 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 
-const { actions } = store( 'mosne-text-to-speech-block', {
+const { state, actions } = store( 'mosne-text-to-speech-block', {
 	state: {
 		isPlaying: false,
 		currentVoice: null,
+		preferredVoice:
+			localStorage.getItem(
+				'mosne-tts-lang-' + document.documentElement.lang
+			) || null,
 		utterance: null,
 		voices: [],
-		currentSpeed: 1,
-		currentPitch: 1,
+		currentSpeed:
+			localStorage.getItem(
+				'mosne-tts-speed-' + document.documentElement.lang
+			) || 1,
+		currentPitch:
+			localStorage.getItem(
+				'mosne-tts-pitch-' + document.documentElement.lang
+			) || 1,
 	},
 	actions: {
 		async loadVoices() {
@@ -30,6 +40,14 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 			if ( localVoices.length > 0 ) {
 				context.voices = localVoices;
 				context.currentVoice = localVoices[ 0 ];
+				if ( state.preferredVoice ) {
+					const voice = localVoices.find(
+						( v ) => v.voiceURI === state.preferredVoice
+					);
+					if ( voice ) {
+						context.currentVoice = voice;
+					}
+				}
 			}
 			// Create initial utterance
 			actions.createUtterance();
@@ -40,8 +58,8 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 
 			const newUtterance = new SpeechSynthesisUtterance( content );
 			newUtterance.lang = document.documentElement.lang;
-			newUtterance.rate = context.currentSpeed;
-			newUtterance.pitch = context.currentPitch;
+			newUtterance.rate = state.currentSpeed;
+			newUtterance.pitch = state.currentPitch;
 
 			if ( context.currentVoice ) {
 				newUtterance.voice = context.currentVoice;
@@ -96,19 +114,29 @@ const { actions } = store( 'mosne-text-to-speech-block', {
 			window.speechSynthesis.cancel();
 			if ( voice ) {
 				context.currentVoice = voice;
+				localStorage.setItem(
+					'mosne-tts-lang-' + document.documentElement.lang,
+					voice.voiceURI
+				);
 				actions.upadateUtterance();
 			} else {
 				console.warn( 'Voice not found' );
 			}
 		},
 		changeSpeed( e ) {
-			const context = getContext();
-			context.currentSpeed = e.target.value;
+			state.currentSpeed = e.target.value;
+			localStorage.setItem(
+				'mosne-tts-speed-' + document.documentElement.lang,
+				e.target.value
+			);
 			actions.upadateUtterance();
 		},
 		changePitch( e ) {
-			const context = getContext();
-			context.currentPitch = e.target.value;
+			state.currentPitch = e.target.value;
+			localStorage.setItem(
+				'mosne-tts-pitch-' + document.documentElement.lang,
+				e.target.value
+			);
 			actions.upadateUtterance();
 		},
 		toggleSettings() {

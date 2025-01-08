@@ -97,13 +97,13 @@ $class_options  = $attributes['classOptions'] ?? '';
 			<label class="wp-block-mosne-text-to-speech__label">
 				<?php esc_html_e( 'Speed', 'mosne-text-to-speech' ); ?>
 
-				<input type="range" min="0.5" max="2" step="0.1" data-wp-bind--value="context.currentSpeed" data-wp-on--change="actions.changeSpeed">
+				<input type="range" min="0.5" max="2" step="0.1" data-wp-bind--value="state.currentSpeed" data-wp-on--change="actions.changeSpeed">
 			</label>
 
 			<label class="wp-block-mosne-text-to-speech__label">
 				<?php esc_html_e( 'Pitch', 'mosne-text-to-speech' ); ?>
 
-				<input type="range" min="0.5" max="2" step="0.1" data-wp-bind--value="context.currentPitch" data-wp-on--change="actions.changePitch">
+				<input type="range" min="0.5" max="2" step="0.1" data-wp-bind--value="state.currentPitch" data-wp-on--change="actions.changePitch">
 			</label>
 
 			<label class="wp-block-mosne-text-to-speech__label">
