@@ -1,7 +1,9 @@
 === Mosne Text to Speech Block ===
-Contributors:      The WordPress Contributors
-Tags:              block
-Tested up to:      6.6
+Contributors:      mosne
+Tags:              block, speech, accessibility, text to speech, text to audio, audio
+Requires at least: 6.5
+Requires PHP:      7.4
+Tested up to:      6.7
 Stable tag:        0.1.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -9,52 +11,50 @@ License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 Read the content of of a page using native Speech Synthesis and  Interactivity API.
 
 == Description ==
+This is a block that allow you to add a text to speech feature to your website.
+using the Web Speech API, the plugin will read the content of the page according to the document language and user's preferences.
+No third-party services are used, so no cookies are required. RGPD-friendly. Accessibility-ready.
 
-This is the long description. No limit, and you can use Markdown (as well as in the following sections).
 
-For backwards compatibility, if this section is missing, the full length of the short description will be used, and
-Markdown parsed.
+== Key Features ==
+
+* Listen to the content of a page according to the document language and user's preferences.
+* skip undesired content adding the class .skip-speech to the element.
+* Accessibility-ready
+* No cookies used (GDPR-friendly)
+* Performance-optimized and lightweight
+* No block library required
+* Primarily built with native WordPress components
+* Developer-friendly and easy to customize
+
+== Stay Connected ==
+
+* [View on GitHub](https://github.com/mosne/mosne-text-to-speech-block)
+* [Visit my website](https://mosne.it/)
 
 == Installation ==
 
-This section describes how to install the plugin and get it working.
-
-e.g.
-
-1. Upload the plugin files to the `/wp-content/plugins/mosne-speech-to-text-block` directory, or install the plugin through the WordPress plugins screen directly.
-1. Activate the plugin through the 'Plugins' screen in WordPress
-
+1. You have a couple of options:
+	* Go to Plugins &rarr; Add New and search for "Mosne text to speech". Once found, click "Install".
+	* Download the Mosne text to speech from wordpress.org and make sure the folder is zipped. Then upload via Plugins &rarr; Add New &rarr; Upload.
+2. Activate the plugin through the 'Plugins' screen on WordPress.
+3. Search for the "Mosne text to speech" block within the Block Editor (Gutenberg) and add it to a block navigation.
 
 == Frequently Asked Questions ==
 
-= A question that someone might have =
-
-An answer to that question.
-
-= What about foo bar? =
-
-Answer to foo bar dilemma.
+=  Can I skip some content? =
+You can skip some content adding the class `.skip-speech` to the element.
 
 == Screenshots ==
 
-1. This screen shot description corresponds to screenshot-1.(png|jpg|jpeg|gif). Note that the screenshot is taken from
-the /assets directory or the directory that contains the stable readme.txt (tags or trunk). Screenshots in the /assets
-directory take precedence. For example, `/assets/screenshot-1.png` would win over `/tags/4.3/screenshot-1.png`
-(or jpg, jpeg, gif).
-2. This is the second screen shot
+1. Example of the plugin in action
 
 == Changelog ==
 
-= 0.1.0 =
-* Release
+= 0.1.0 - 2025-02-01 =
 
-== Arbitrary section ==
-
-You may provide arbitrary sections, in the same format as the ones above. This may be of use for extremely complicated
-plugins where more information needs to be conveyed that doesn't fit into the categories of "description" or
-"installation." Arbitrary sections will be shown below the built-in sections outlined above.
-
+* Initial release
 
 === copyright ===
-the icons onf this blocks come from
+the icons onf this blocks come from Heroicons with MIT licenses
 https://heroicons.com/

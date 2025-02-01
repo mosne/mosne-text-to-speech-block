@@ -76,11 +76,18 @@ const {
     currentPitch: localStorage.getItem('mosne-tts-pitch-' + document.documentElement.lang) || 1
   },
   actions: {
-    async loadVoices() {
+    loadVoices() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      console.log('context', context);
+      console.log('voices', state.voices);
       const availableVoices = window.speechSynthesis.getVoices();
-      context.voices = availableVoices;
-      context.currentVoice = availableVoices[0];
+      console.log('availableVoices', availableVoices);
+      if (!availableVoices) {
+        console.warn('No voices available');
+        return;
+      }
+      state.voices = availableVoices;
+      state.currentVoice = availableVoices[0];
 
       // get current docuemtn locale
       const currentLocale = document.documentElement.lang;
@@ -88,12 +95,12 @@ const {
       // Set default French voice or first available
       const localVoices = availableVoices.filter(voice => voice.lang.startsWith(currentLocale));
       if (localVoices.length > 0) {
-        context.voices = localVoices;
-        context.currentVoice = localVoices[0];
+        state.voices = localVoices;
+        state.currentVoice = localVoices[0];
         if (state.preferredVoice) {
           const voice = localVoices.find(v => v.voiceURI === state.preferredVoice);
           if (voice) {
-            context.currentVoice = voice;
+            state.currentVoice = voice;
           }
         }
       }
@@ -107,16 +114,16 @@ const {
       newUtterance.lang = document.documentElement.lang;
       newUtterance.rate = state.currentSpeed;
       newUtterance.pitch = state.currentPitch;
-      if (context.currentVoice) {
-        newUtterance.voice = context.currentVoice;
+      if (state.currentVoice) {
+        newUtterance.voice = state.currentVoice;
       } else {
         console.warn('Current Voice not found');
       }
-      context.utterance = newUtterance;
+      state.utterance = newUtterance;
     },
     upadateUtterance() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
-      const utterance = context.utterance;
+      const utterance = state.utterance;
       if (utterance) {
         window.speechSynthesis.cancel();
         context.isPlaying = false;
@@ -132,9 +139,9 @@ const {
       // init speach to text
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
-      } else if (context.utterance) {
+      } else if (state.utterance) {
         window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(context.utterance);
+        window.speechSynthesis.speak(state.utterance);
       } else {
         console.warn('Utterance not found');
       }
@@ -152,11 +159,11 @@ const {
     changeVoice(e) {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = false;
-      const voice = context.voices.find(v => v.voiceURI === e.target.value);
+      const voice = state.voices.find(v => v.voiceURI === e.target.value);
       // Reset current utterance
       window.speechSynthesis.cancel();
       if (voice) {
-        context.currentVoice = voice;
+        state.currentVoice = voice;
         localStorage.setItem('mosne-tts-lang-' + document.documentElement.lang, voice.voiceURI);
         actions.upadateUtterance();
       } else {
@@ -205,7 +212,7 @@ const {
     },
     isSelected() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
-      return context.voice.voiceURI === context.currentVoice.voiceURI;
+      return context.voice.voiceURI === state.currentVoice.voiceURI;
     }
   }
 });

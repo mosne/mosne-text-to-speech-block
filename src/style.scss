@@ -63,13 +63,13 @@
 		position: relative;
 		//sr-only
 		span {
-		position: absolute;
-		clip: rect(1px, 1px, 1px, 1px);
-		clip-path: inset(50%);
-		height: 1px;
-		width: 1px;
-		overflow: hidden;
-		white-space: nowrap;
+			position: absolute;
+			clip: rect(1px, 1px, 1px, 1px);
+			clip-path: inset(50%);
+			height: 1px;
+			width: 1px;
+			overflow: hidden;
+			white-space: nowrap;
 		}
 	}
 
