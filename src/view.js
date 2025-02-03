@@ -8,29 +8,25 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		isPlaying: false,
 		currentVoice: null,
 		preferredVoice:
-			localStorage.getItem(
+			window.localStorage.getItem(
 				'mosne-tts-lang-' + document.documentElement.lang
 			) || null,
 		utterance: null,
 		voices: [],
 		currentSpeed:
-			localStorage.getItem(
+			window.localStorage.getItem(
 				'mosne-tts-speed-' + document.documentElement.lang
 			) || 1,
 		currentPitch:
-			localStorage.getItem(
+			window.localStorage.getItem(
 				'mosne-tts-pitch-' + document.documentElement.lang
 			) || 1,
 	},
 	actions: {
 		loadVoices() {
-			const context = getContext();
-			console.log( 'context', context );
-			console.log( 'voices', state.voices );
 			const availableVoices = window.speechSynthesis.getVoices();
-			console.log( 'availableVoices', availableVoices );
 			if ( ! availableVoices ) {
-				console.warn( 'No voices available' );
+				console.warn( 'No voices available' ); // eslint-disable-line
 				return;
 			}
 			state.voices = availableVoices;
@@ -60,20 +56,21 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			actions.createUtterance();
 		},
 		createUtterance() {
-			const context = getContext();
 			const content = actions.getContent();
 
-			const newUtterance = new SpeechSynthesisUtterance( content );
+			const newUtterance = new window.SpeechSynthesisUtterance( content );
 			newUtterance.lang = document.documentElement.lang;
 			newUtterance.rate = state.currentSpeed;
 			newUtterance.pitch = state.currentPitch;
 
 			if ( state.currentVoice ) {
-				newUtterance.voice = state.currentVoice;
+				const voice = state.voices.find(
+					( v ) => v.voiceURI === state.currentVoice.voiceURI
+				);
+				newUtterance.voice = voice;
 			} else {
-				console.warn( 'Current Voice not found' );
+				console.warn( 'Current Voice not found' ); // eslint-disable-line
 			}
-
 			state.utterance = newUtterance;
 		},
 		upadateUtterance() {
@@ -81,10 +78,11 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			const utterance = state.utterance;
 			if ( utterance ) {
 				window.speechSynthesis.cancel();
+				context.utterance = null;
 				context.isPlaying = false;
 				actions.createUtterance();
 			} else {
-				console.warn( 'Utterance not found' );
+				console.warn( 'Utterance not found' ); // eslint-disable-line
 			}
 		},
 		Play() {
@@ -98,7 +96,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				window.speechSynthesis.cancel();
 				window.speechSynthesis.speak( state.utterance );
 			} else {
-				console.warn( 'Utterance not found' );
+				console.warn( 'Utterance not found' ); // eslint-disable-line
 			}
 		},
 		Pause() {
@@ -121,18 +119,18 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			window.speechSynthesis.cancel();
 			if ( voice ) {
 				state.currentVoice = voice;
-				localStorage.setItem(
+				window.localStorage.setItem(
 					'mosne-tts-lang-' + document.documentElement.lang,
 					voice.voiceURI
 				);
 				actions.upadateUtterance();
 			} else {
-				console.warn( 'Voice not found' );
+				console.warn( 'Voice not found' ); // eslint-disable-line
 			}
 		},
 		changeSpeed( e ) {
 			state.currentSpeed = e.target.value;
-			localStorage.setItem(
+			window.localStorage.setItem(
 				'mosne-tts-speed-' + document.documentElement.lang,
 				e.target.value
 			);
@@ -140,7 +138,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 		changePitch( e ) {
 			state.currentPitch = e.target.value;
-			localStorage.setItem(
+			window.localStorage.setItem(
 				'mosne-tts-pitch-' + document.documentElement.lang,
 				e.target.value
 			);

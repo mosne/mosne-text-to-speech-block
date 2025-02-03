@@ -24,11 +24,11 @@ try {
   console.log('readme.txt',readmeVersion);
 
   // load version from php file
-  const phpVersion = getVersionFromFile('mosne-text-to-speech.php', /Version:\s*(\S+)/);
+  const phpVersion = getVersionFromFile('mosne-text-to-speech-block.php', /Version:\s*(\S+)/);
   console.log('plugin',phpVersion);
 
   // load version from php file as constant
-  const phpConstant = getVersionFromFile('mosne-text-to-speech.php', /define\(\s*'MOSNE_TEXT_TO_SPEECH_VERSION',\s*'(\S+)'\s*\);/);
+  const phpConstant = getVersionFromFile('mosne-text-to-speech-block.php', /define\(\s*'MOSNE_TEXT_TO_SPEECH_VERSION',\s*'(\S+)'\s*\);/);
   console.log('Constant',phpConstant);
 
   // load verdion from json file package.json

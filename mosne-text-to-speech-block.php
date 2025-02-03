@@ -10,12 +10,12 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * author URI:        https://mosne.it
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       mosne-speech-to-text-block
+ * Text Domain:       mosne-text-to-speech-block
  *
  * @package           create-block
  */
 
- namespace Mosne\TextToSpeech;
+namespace Mosne\TextToSpeech;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
