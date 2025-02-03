@@ -15,7 +15,7 @@
 		"start": "wp-scripts start --experimental-modules",
 		"make-pot": "wp i18n make-pot . languages/mosne-text-to-speech-block.pot --slug=mosne-text-to-speech-block --domain=mosne-text-to-speech-block --exclude=node_modules,src",
 		"make-json": "wp i18n make-json languages/ --no-purge",
-		"check" : "node check_versions.js"
+		"check": "node check_versions.js"
 	},
 	"files": [
 		"[^.]*",

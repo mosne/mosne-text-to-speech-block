@@ -26,7 +26,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		loadVoices() {
 			const availableVoices = window.speechSynthesis.getVoices();
 			if ( ! availableVoices ) {
-				console.warn( 'No voices available' ); // eslint-disable-line
 				return;
 			}
 			state.voices = availableVoices;
@@ -57,7 +56,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 		createUtterance() {
 			const content = actions.getContent();
-
 			const newUtterance = new window.SpeechSynthesisUtterance( content );
 			newUtterance.lang = document.documentElement.lang;
 			newUtterance.rate = state.currentSpeed;
@@ -68,8 +66,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					( v ) => v.voiceURI === state.currentVoice.voiceURI
 				);
 				newUtterance.voice = voice;
-			} else {
-				console.warn( 'Current Voice not found' ); // eslint-disable-line
 			}
 			state.utterance = newUtterance;
 		},
@@ -81,8 +77,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				context.utterance = null;
 				context.isPlaying = false;
 				actions.createUtterance();
-			} else {
-				console.warn( 'Utterance not found' ); // eslint-disable-line
 			}
 		},
 		Play() {
@@ -95,8 +89,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			} else if ( state.utterance ) {
 				window.speechSynthesis.cancel();
 				window.speechSynthesis.speak( state.utterance );
-			} else {
-				console.warn( 'Utterance not found' ); // eslint-disable-line
 			}
 		},
 		Pause() {
@@ -124,8 +116,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					voice.voiceURI
 				);
 				actions.upadateUtterance();
-			} else {
-				console.warn( 'Voice not found' ); // eslint-disable-line
 			}
 		},
 		changeSpeed( e ) {
