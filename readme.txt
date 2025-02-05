@@ -4,7 +4,7 @@ Tags:              block, speech, accessibility, audio
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        0.1.0
+Stable tag:        0.1.1
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -50,6 +50,10 @@ You can skip some content adding the class `.skip-speech` to the element.
 1. Example of the plugin in action
 
 == Changelog ==
+
+= 0.1.1 - 2025-02-05 =
+
+* Fix security issue
 
 = 0.1.0 - 2025-02-01 =
 
