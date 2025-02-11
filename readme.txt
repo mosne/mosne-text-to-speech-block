@@ -1,10 +1,10 @@
 === Mosne Text to Speech Block ===
 Contributors:      mosne
-Tags:              block, speech, accessibility, text to speech, text to audio, audio
+Tags:              block, speech, accessibility, audio
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        0.1.0
+Stable tag:        0.1.1
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,10 +51,14 @@ You can skip some content adding the class `.skip-speech` to the element.
 
 == Changelog ==
 
+= 0.1.1 - 2025-02-05 =
+
+* Fix security issue
+
 = 0.1.0 - 2025-02-01 =
 
 * Initial release
 
 === copyright ===
-the icons onf this blocks come from Heroicons with MIT licenses
-https://heroicons.com/
+The icons onf this blocks come from Heroicons with MIT licenses
+[heroicons.com](https://heroicons.com/)

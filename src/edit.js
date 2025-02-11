@@ -43,26 +43,31 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'mosne-text-to-speech' ) }>
+				<PanelBody
+					title={ __( 'Settings', 'mosne-text-to-speech-block' ) }
+				>
 					<ToggleGroupControl
 						__nextHasNoMarginBottom
 						isBlock
 						value={ classOptions }
-						label={ __( 'Options', 'mosne-text-to-speech' ) }
+						label={ __( 'Options', 'mosne-text-to-speech-block' ) }
 						onChange={ ( value ) =>
 							setAttributes( { classOptions: value } )
 						}
 					>
 						<ToggleGroupControlOption
-							label={ __( 'Icon', 'mosne-text-to-speech' ) }
+							label={ __( 'Icon', 'mosne-text-to-speech-block' ) }
 							value="has-icon hide-label"
 						/>
 						<ToggleGroupControlOption
-							label={ __( 'Label', 'mosne-text-to-speech' ) }
+							label={ __(
+								'Label',
+								'mosne-text-to-speech-block'
+							) }
 							value="has-label hide-icon"
 						/>
 						<ToggleGroupControlOption
-							label={ __( 'Both', 'mosne-text-to-speech' ) }
+							label={ __( 'Both', 'mosne-text-to-speech-block' ) }
 							value="has-icon has-label"
 						/>
 					</ToggleGroupControl>
@@ -80,7 +85,7 @@ export default function Edit( { attributes, setAttributes } ) {
 					value={ label }
 					placeholder={ __(
 						'Listen to this article',
-						'mosne-text-to-speech'
+						'mosne-text-to-speech-block'
 					) }
 					onChange={ ( content ) => {
 						setAttributes( { label: content } );
@@ -93,18 +98,18 @@ export default function Edit( { attributes, setAttributes } ) {
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
-								stroke-width="1.5"
+								strokeWidth="1.5"
 								stroke="currentColor"
-								class="size-6"
+								className="size-6"
 							>
 								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
+									strokeLinecap="round"
+									strokeLinejoin="round"
 									d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.347a1.125 1.125 0 0 1 0 1.972l-11.54 6.347a1.125 1.125 0 0 1-1.667-.986V5.653Z"
 								/>
 							</svg>
 							<span>
-								{ __( 'Play', 'mosne-text-to-speech' ) }
+								{ __( 'Play', 'mosne-text-to-speech-block' ) }
 							</span>
 						</button>
 						<button className="wp-block-mosne-text-to-speech__button wp-element-button">
@@ -112,18 +117,21 @@ export default function Edit( { attributes, setAttributes } ) {
 								xmlns="http://www.w3.org/2000/svg"
 								fill="none"
 								viewBox="0 0 24 24"
-								stroke-width="1.5"
+								strokeWidth="1.5"
 								stroke="currentColor"
-								class="size-6"
+								className="size-6"
 							>
 								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
+									strokeLinecap="round"
+									strokeLinejoin="round"
 									d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75"
 								/>
 							</svg>
 							<span>
-								{ __( 'Settings', 'mosne-text-to-speech' ) }
+								{ __(
+									'Settings',
+									'mosne-text-to-speech-block'
+								) }
 							</span>
 						</button>
 					</div>

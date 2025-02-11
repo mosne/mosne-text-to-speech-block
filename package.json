@@ -1,6 +1,6 @@
 {
 	"name": "mosne-text-to-speech-block",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "An interactive block with the Interactivity API.",
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",
@@ -12,10 +12,28 @@
 		"lint:js": "wp-scripts lint-js",
 		"packages-update": "wp-scripts packages-update",
 		"plugin-zip": "wp-scripts plugin-zip",
-		"start": "wp-scripts start --experimental-modules"
+		"start": "wp-scripts start --experimental-modules",
+		"make-pot": "wp i18n make-pot . languages/mosne-text-to-speech-block.pot --slug=mosne-text-to-speech-block --domain=mosne-text-to-speech-block --exclude=node_modules,src",
+		"make-json": "wp i18n make-json languages/ --no-purge",
+		"check": "node check_versions.js"
 	},
 	"files": [
-		"[^.]*"
+		"[^.]*",
+		"!.idea",
+		"!.vscode",
+		"!.git",
+		"!.yarn",
+		"!yarn.lock",
+		"!readme.md",
+		"!vendor",
+		"!src",
+		"!*.zip",
+		"!check_versions.js",
+		"!*.sql",
+		"!*.gz",
+		"!*.dist",
+		"!package.json",
+		"src"
 	],
 	"dependencies": {
 		"@wordpress/interactivity": "^6.13.0"

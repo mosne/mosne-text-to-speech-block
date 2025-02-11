@@ -3,6 +3,7 @@
 ![ Mosne Text to Speech ](https://github.com/mosne//mosne-text-to-speech-block/blob/main/.wordpress-org/banner-1544x500.png)
 
 ## Description
+
 This is a block that allow you to add a text to speech feature to your website.
 using the Web Speech API, the plugin will read the content of the page according to the document language and user's preferences.
 No third-party services are used, so no cookies are required. RGPD-friendly. Accessibility-ready.
@@ -44,7 +45,16 @@ You can skip some content adding the class ```.skip-speech``` to the element.
 1. Example of the plugin in action
    ![screenshot-1](https://github.com/mosne/mosne-dark-palette/blob/main/.wordpress-org/screenshot-1.gif)
 
+## Copyright
+
+The icons onf this blocks come from Heroicons with MIT licenses
+[heroicons.com](https://heroicons.com/)
+
 ## Changelog
+
+### 0.1.1 - 2025-02-05
+
+* Fix security issue
 
 ### 0.1.0 - 2025-02-01
 

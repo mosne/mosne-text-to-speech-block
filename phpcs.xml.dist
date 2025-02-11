@@ -3,10 +3,10 @@
          name="Dark Palette"
          xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/squizlabs/PHP_CodeSniffer/master/phpcs.xsd">
 
-	<description>Coding standard for Mosne Dark palette plugin</description>
+	<description>Coding standard for Mosne plugins</description>
 
     <!-- Scan all files in directory -->
-    <file>mosne-dark-palette.php</file>
+    <file>mosne-text-to-speech-block.php</file>
     <file>src/render.php</file>
 
     <exclude-pattern>./build/</exclude-pattern>
@@ -33,7 +33,7 @@
     <rule ref="WordPress.WP.I18n">
         <properties>
             <property name="text_domain" type="array">
-                <element value="access-config"/>
+                <element value="mosne-text-to-speech-block"/>
             </property>
         </properties>
     </rule>
