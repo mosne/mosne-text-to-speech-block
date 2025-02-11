@@ -11,7 +11,7 @@
     </plugins>
 
     <projectFiles>
-        <file name="mosne-dark-palette.php"/>
+        <file name="mosne-text-to-speech-block.php"/>
         <file name="src/render.php"/>
     </projectFiles>
 </psalm>

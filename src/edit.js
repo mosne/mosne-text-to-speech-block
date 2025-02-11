@@ -43,7 +43,9 @@ export default function Edit( { attributes, setAttributes } ) {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Settings', 'mosne-text-to-speech-block' ) }>
+				<PanelBody
+					title={ __( 'Settings', 'mosne-text-to-speech-block' ) }
+				>
 					<ToggleGroupControl
 						__nextHasNoMarginBottom
 						isBlock
@@ -58,7 +60,10 @@ export default function Edit( { attributes, setAttributes } ) {
 							value="has-icon hide-label"
 						/>
 						<ToggleGroupControlOption
-							label={ __( 'Label', 'mosne-text-to-speech-block' ) }
+							label={ __(
+								'Label',
+								'mosne-text-to-speech-block'
+							) }
 							value="has-label hide-icon"
 						/>
 						<ToggleGroupControlOption
@@ -123,7 +128,10 @@ export default function Edit( { attributes, setAttributes } ) {
 								/>
 							</svg>
 							<span>
-								{ __( 'Settings', 'mosne-text-to-speech-block' ) }
+								{ __(
+									'Settings',
+									'mosne-text-to-speech-block'
+								) }
 							</span>
 						</button>
 					</div>
