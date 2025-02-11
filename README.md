@@ -1,6 +1,6 @@
 # Mosne Text to Speech block
 
-![ Mosne Text to Speech ](https://github.com/mosne//mosne-text-to-speech-block/blob/main/.wordpress-org/banner-1544x500.png)
+![ Mosne Text to Speech ](https://github.com/mosne/mosne-text-to-speech-block/blob/main/.wordpress-org/banner-1544x500.png)
 
 ## Description
 
@@ -43,7 +43,7 @@ You can skip some content adding the class ```.skip-speech``` to the element.
 ## Screenshots
 
 1. Example of the plugin in action
-   ![screenshot-1](https://github.com/mosne/mosne-dark-palette/blob/main/.wordpress-org/screenshot-1.gif)
+   ![screenshot-1](https://github.com/mosne/mosne-text-to-speech-block/blob/main/.wordpress-org/screenshot-1.gif)
 
 ## Copyright
 
