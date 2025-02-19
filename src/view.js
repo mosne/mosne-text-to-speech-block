@@ -25,37 +25,41 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 	actions: {
 		loadVoices() {
 			const availableVoices = window.speechSynthesis.getVoices();
-			if ( ! availableVoices ) {
+			if (!availableVoices || availableVoices.length === 0) {
+				// If voices aren't available yet, try again after a short delay
+				setTimeout(() => actions.loadVoices(), 100);
 				return;
 			}
+			
 			state.voices = availableVoices;
-			state.currentVoice = availableVoices[ 0 ];
+			state.currentVoice = availableVoices[0];
 
-			// get current docuemtn locale
 			const currentLocale = document.documentElement.lang;
-
-			// Set default French voice or first available
-			const localVoices = availableVoices.filter( ( voice ) =>
-				voice.lang.startsWith( currentLocale )
+			const localVoices = availableVoices.filter((voice) =>
+				voice.lang.startsWith(currentLocale)
 			);
 
-			if ( localVoices.length > 0 ) {
+			if (localVoices.length > 0) {
 				state.voices = localVoices;
-				state.currentVoice = localVoices[ 0 ];
-				if ( state.preferredVoice ) {
+				state.currentVoice = localVoices[0];
+				if (state.preferredVoice) {
 					const voice = localVoices.find(
-						( v ) => v.voiceURI === state.preferredVoice
+						(v) => v.voiceURI === state.preferredVoice
 					);
-					if ( voice ) {
+					if (voice) {
 						state.currentVoice = voice;
 					}
 				}
 			}
-			// Create initial utterance
-			actions.createUtterance();
+			
+			// Create initial utterance after a small delay
+			setTimeout(() => {
+				actions.createUtterance();
+			}, 50);
 		},
 		createUtterance() {
 			const content = actions.getContent();
+			
 			const newUtterance = new window.SpeechSynthesisUtterance(content);
 			newUtterance.lang = document.documentElement.lang;
 			newUtterance.rate = state.currentSpeed;
@@ -63,72 +67,11 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			// Get the main element for highlighting
 			const mainElement = document.querySelector('main');
-			
-			// Add word boundary event handler
-			newUtterance.onboundary = (event) => {
-				if (event.name === 'word') {
-					// Remove any existing highlights
-					const existing = mainElement.querySelector('.mosne-tts-highlighted-word');
-					if (existing) {
-						const parent = existing.parentNode;
-						parent.replaceChild(
-							document.createTextNode(existing.textContent),
-							existing
-						);
-					}
 
-					// Find and highlight the current word
-					const wordPosition = event.charIndex;
-					const wordLength = event.charLength || 1;
-					const range = document.createRange();
-					const walker = document.createTreeWalker(
-						mainElement,
-						NodeFilter.SHOW_TEXT,
-						{
-							acceptNode: function(node) {
-								// Skip nodes that are within .skip-speech elements
-								if (node.parentElement.closest('.skip-speech')) {
-									return NodeFilter.FILTER_REJECT;
-								}
-								return NodeFilter.FILTER_ACCEPT;
-							}
-						},
-						false
-					);
+			newUtterance.onboundary = function(event) {
+				if (!mainElement) return;
 
-					let currentIndex = 0;
-					let node = walker.nextNode();
-
-					// Find the text node containing the word
-					while (node) {
-						if (currentIndex + node.length > wordPosition) {
-							const nodeOffset = wordPosition - currentIndex;
-							
-							// Create highlight span
-							const span = document.createElement('span');
-							span.className = 'mosne-tts-highlighted-word';
-							
-							// Set the range to the current word
-							range.setStart(node, nodeOffset);
-							range.setEnd(node, nodeOffset + wordLength);
-							
-							try {
-								// Replace the text with highlighted span
-								range.surroundContents(span);
-							} catch (e) {
-								// If highlighting fails, continue without highlighting this word
-								console.warn('Failed to highlight word:', e);
-							}
-							break;
-						}
-						currentIndex += node.length;
-						node = walker.nextNode();
-					}
-				}
-			};
-
-			// Reset highlighting when speech ends
-			newUtterance.onend = () => {
+				// Remove previous highlights
 				const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
 				highlighted.forEach(el => {
 					const parent = el.parentNode;
@@ -137,6 +80,69 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						el
 					);
 				});
+
+				// Safety check for valid boundary event
+				if (!event.charIndex || !event.charLength || event.charIndex + event.charLength > content.length) {
+					return;
+				}
+
+				const range = document.createRange();
+				const walker = document.createTreeWalker(
+					mainElement,
+					NodeFilter.SHOW_TEXT,
+					{
+						acceptNode: function(node) {
+							// Check if the node or any of its ancestors has the skip-speech class
+							let current = node.parentElement;
+							while (current) {
+								if (current.classList && current.classList.contains('skip-speech')) {
+									return NodeFilter.FILTER_REJECT;
+								}
+								current = current.parentElement;
+							}
+							return NodeFilter.FILTER_ACCEPT;
+						}
+					},
+					false
+				);
+
+				let charCount = 0;
+				let startContainer = null;
+				let startOffset = 0;
+				let endContainer = null;
+				let endOffset = 0;
+
+				// Find the text node and offset for highlighting
+				let node;
+				while ((node = walker.nextNode())) {
+					const nodeLength = node.length;
+					if (!startContainer && charCount + nodeLength > event.charIndex) {
+						startContainer = node;
+						startOffset = event.charIndex - charCount;
+					}
+					if (startContainer && charCount + nodeLength > event.charIndex + event.charLength) {
+						endContainer = node;
+						endOffset = Math.min(event.charIndex + event.charLength - charCount, node.length);
+						break;
+					}
+					charCount += nodeLength;
+				}
+
+				// Only proceed if we found valid start and end points
+				if (startContainer && endContainer && 
+					startOffset <= startContainer.length && 
+					endOffset <= endContainer.length) {
+					try {
+						range.setStart(startContainer, startOffset);
+						range.setEnd(endContainer, endOffset);
+						
+						const span = document.createElement('span');
+						span.className = 'mosne-tts-highlighted-word';
+						range.surroundContents(span);
+					} catch (e) {
+						// Silently handle any range errors
+					}
+				}
 			};
 
 			if (state.currentVoice) {
@@ -147,26 +153,76 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			}
 			state.utterance = newUtterance;
 		},
-		upadateUtterance() {
-			const context = getContext();
+		updateUtterance() {
+			// Get context only if we need to update UI state
 			const utterance = state.utterance;
-			if ( utterance ) {
+			if (utterance) {
 				window.speechSynthesis.cancel();
-				context.utterance = null;
-				context.isPlaying = false;
-				actions.createUtterance();
+				
+				// Remove any existing highlights
+				const mainElement = document.querySelector('main');
+				const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+				highlighted.forEach(el => {
+					const parent = el.parentNode;
+					parent.replaceChild(
+						document.createTextNode(el.textContent),
+						el
+					);
+				});
+
+				// Only update context if we're in an interactive component
+				try {
+					const context = getContext();
+					if (context) {
+						context.utterance = null;
+						context.isPlaying = false;
+					}
+				} catch (e) {
+					// Handle case where context is not available
+					state.isPlaying = false;
+				}
+				
+				// Check if synthesis is ready using a promise
+				const checkSynthesisReady = () => {
+					return new Promise((resolve) => {
+						const check = () => {
+							if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+								resolve();
+							} else {
+								setTimeout(check, 100);
+							}
+						};
+						check();
+					});
+				};
+
+				// Wait for synthesis to be ready before creating new utterance
+				checkSynthesisReady().then(() => {
+					actions.createUtterance();
+				});
 			}
 		},
 		Play() {
 			const context = getContext();
 			context.isPlaying = true;
 
-			// init speach to text
-			if ( window.speechSynthesis.paused ) {
-				window.speechSynthesis.resume();
-			} else if ( state.utterance ) {
+			// Chrome fix: force reset synthesis if it's in a bad state
+			if (window.speechSynthesis.speaking) {
 				window.speechSynthesis.cancel();
-				window.speechSynthesis.speak( state.utterance );
+				setTimeout(() => {
+					if (state.utterance) {
+						window.speechSynthesis.speak(state.utterance);
+					}
+				}, 50);
+				return;
+			}
+
+			// init speech to text
+			if (window.speechSynthesis.paused) {
+				window.speechSynthesis.resume();
+			} else if (state.utterance) {
+				window.speechSynthesis.cancel();
+				window.speechSynthesis.speak(state.utterance);
 			}
 		},
 		Pause() {
@@ -190,21 +246,28 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				);
 			});
 		},
-		changeVoice( e ) {
+		changeVoice(e) {
 			const context = getContext();
 			context.isPlaying = false;
-			const voice = state.voices.find(
-				( v ) => v.voiceURI === e.target.value
-			);
-			// Reset current utterance
+			
+			// Cancel any ongoing speech
 			window.speechSynthesis.cancel();
-			if ( voice ) {
+			
+			const voice = state.voices.find(
+				(v) => v.voiceURI === e.target.value
+			);
+			
+			if (voice) {
 				state.currentVoice = voice;
 				window.localStorage.setItem(
 					'mosne-tts-lang-' + document.documentElement.lang,
 					voice.voiceURI
 				);
-				actions.upadateUtterance();
+				
+				// Small delay to ensure speech synthesis is ready
+				setTimeout(() => {
+					actions.updateUtterance();
+				}, 50);
 			}
 		},
 		changeSpeed( e ) {
@@ -213,7 +276,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				'mosne-tts-speed-' + document.documentElement.lang,
 				e.target.value
 			);
-			actions.upadateUtterance();
+			actions.updateUtterance();
 		},
 		changePitch( e ) {
 			state.currentPitch = e.target.value;
@@ -221,7 +284,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				'mosne-tts-pitch-' + document.documentElement.lang,
 				e.target.value
 			);
-			actions.upadateUtterance();
+			actions.updateUtterance();
 		},
 		toggleSettings() {
 			const context = getContext();
