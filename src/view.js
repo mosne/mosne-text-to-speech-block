@@ -56,14 +56,92 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 		createUtterance() {
 			const content = actions.getContent();
-			const newUtterance = new window.SpeechSynthesisUtterance( content );
+			const newUtterance = new window.SpeechSynthesisUtterance(content);
 			newUtterance.lang = document.documentElement.lang;
 			newUtterance.rate = state.currentSpeed;
 			newUtterance.pitch = state.currentPitch;
 
-			if ( state.currentVoice ) {
+			// Get the main element for highlighting
+			const mainElement = document.querySelector('main');
+			
+			// Add word boundary event handler
+			newUtterance.onboundary = (event) => {
+				if (event.name === 'word') {
+					// Remove any existing highlights
+					const existing = mainElement.querySelector('.mosne-tts-highlighted-word');
+					if (existing) {
+						const parent = existing.parentNode;
+						parent.replaceChild(
+							document.createTextNode(existing.textContent),
+							existing
+						);
+					}
+
+					// Find and highlight the current word
+					const wordPosition = event.charIndex;
+					const wordLength = event.charLength || 1;
+					const range = document.createRange();
+					const walker = document.createTreeWalker(
+						mainElement,
+						NodeFilter.SHOW_TEXT,
+						{
+							acceptNode: function(node) {
+								// Skip nodes that are within .skip-speech elements
+								if (node.parentElement.closest('.skip-speech')) {
+									return NodeFilter.FILTER_REJECT;
+								}
+								return NodeFilter.FILTER_ACCEPT;
+							}
+						},
+						false
+					);
+
+					let currentIndex = 0;
+					let node = walker.nextNode();
+
+					// Find the text node containing the word
+					while (node) {
+						if (currentIndex + node.length > wordPosition) {
+							const nodeOffset = wordPosition - currentIndex;
+							
+							// Create highlight span
+							const span = document.createElement('span');
+							span.className = 'mosne-tts-highlighted-word';
+							
+							// Set the range to the current word
+							range.setStart(node, nodeOffset);
+							range.setEnd(node, nodeOffset + wordLength);
+							
+							try {
+								// Replace the text with highlighted span
+								range.surroundContents(span);
+							} catch (e) {
+								// If highlighting fails, continue without highlighting this word
+								console.warn('Failed to highlight word:', e);
+							}
+							break;
+						}
+						currentIndex += node.length;
+						node = walker.nextNode();
+					}
+				}
+			};
+
+			// Reset highlighting when speech ends
+			newUtterance.onend = () => {
+				const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+				highlighted.forEach(el => {
+					const parent = el.parentNode;
+					parent.replaceChild(
+						document.createTextNode(el.textContent),
+						el
+					);
+				});
+			};
+
+			if (state.currentVoice) {
 				const voice = state.voices.find(
-					( v ) => v.voiceURI === state.currentVoice.voiceURI
+					(v) => v.voiceURI === state.currentVoice.voiceURI
 				);
 				newUtterance.voice = voice;
 			}
@@ -100,6 +178,17 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			const context = getContext();
 			context.isPlaying = false;
 			window.speechSynthesis.cancel();
+			
+			// Remove any existing highlights
+			const mainElement = document.querySelector('main');
+			const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+			highlighted.forEach(el => {
+				const parent = el.parentNode;
+				parent.replaceChild(
+					document.createTextNode(el.textContent),
+					el
+				);
+			});
 		},
 		changeVoice( e ) {
 			const context = getContext();
@@ -170,3 +259,70 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 	},
 } );
+
+class TextToSpeechManager {
+	constructor() {
+		this.utterance = null;
+		this.highlightedElement = null;
+		this.originalText = '';
+		this.synth = window.speechSynthesis;
+	}
+
+	speak(text, element) {
+		// Cancel any ongoing speech
+		this.synth.cancel();
+		
+		this.utterance = new SpeechSynthesisUtterance(text);
+		this.highlightedElement = element;
+		this.originalText = text;
+
+		// Split text into words while preserving punctuation
+		const words = text.match(/[\w'-]+|[.,!?;]|\s+/g);
+		let currentIndex = 0;
+
+		this.utterance.onboundary = (event) => {
+			if (event.name === 'word') {
+				// Remove previous highlighting
+				this.highlightedElement.innerHTML = this.originalText;
+				
+				// Calculate the word position
+				const wordPosition = event.charIndex;
+				const wordLength = event.charLength || 1;
+
+				// Create highlighted version
+				const beforeText = this.originalText.substring(0, wordPosition);
+				const highlightedWord = this.originalText.substring(wordPosition, wordPosition + wordLength);
+				const afterText = this.originalText.substring(wordPosition + wordLength);
+
+				// Apply highlighting
+				this.highlightedElement.innerHTML = `${beforeText}<span class="highlighted-word">${highlightedWord}</span>${afterText}`;
+			}
+		};
+
+		this.utterance.onend = () => {
+			// Reset highlighting when speech ends
+			if (this.highlightedElement) {
+				this.highlightedElement.innerHTML = this.originalText;
+			}
+		};
+
+		this.synth.speak(this.utterance);
+	}
+
+	stop() {
+		this.synth.cancel();
+		if (this.highlightedElement) {
+			this.highlightedElement.innerHTML = this.originalText;
+		}
+	}
+}
+
+// Add CSS styles for highlighting
+const style = document.createElement('style');
+style.textContent = `
+	.mosne-tts-highlighted-word {
+		outline: 2px solid currentColor;
+		outline-offset: 3px;
+	}
+`;
+document.head.appendChild(style);
