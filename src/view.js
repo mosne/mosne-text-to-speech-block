@@ -154,33 +154,25 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			state.utterance = newUtterance;
 		},
 		updateUtterance() {
-			// Get context only if we need to update UI state
 			const utterance = state.utterance;
 			if (utterance) {
 				window.speechSynthesis.cancel();
 				
 				// Remove any existing highlights
 				const mainElement = document.querySelector('main');
-				const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
-				highlighted.forEach(el => {
-					const parent = el.parentNode;
-					parent.replaceChild(
-						document.createTextNode(el.textContent),
-						el
-					);
-				});
-
-				// Only update context if we're in an interactive component
-				try {
-					const context = getContext();
-					if (context) {
-						context.utterance = null;
-						context.isPlaying = false;
-					}
-				} catch (e) {
-					// Handle case where context is not available
-					state.isPlaying = false;
+				if (mainElement) {
+					const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+					highlighted.forEach(el => {
+						const parent = el.parentNode;
+						parent.replaceChild(
+							document.createTextNode(el.textContent),
+							el
+						);
+					});
 				}
+
+				// Update state directly without relying on context
+				state.isPlaying = false;
 				
 				// Check if synthesis is ready using a promise
 				const checkSynthesisReady = () => {
@@ -206,6 +198,12 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			const context = getContext();
 			context.isPlaying = true;
 
+			// If paused, just resume
+			if (window.speechSynthesis.paused) {
+				window.speechSynthesis.resume();
+				return;
+			}
+
 			// Chrome fix: force reset synthesis if it's in a bad state
 			if (window.speechSynthesis.speaking) {
 				window.speechSynthesis.cancel();
@@ -217,18 +215,19 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				return;
 			}
 
-			// init speech to text
-			if (window.speechSynthesis.paused) {
-				window.speechSynthesis.resume();
-			} else if (state.utterance) {
-				window.speechSynthesis.cancel();
+			// Start new speech if not already speaking
+			if (state.utterance) {
 				window.speechSynthesis.speak(state.utterance);
 			}
 		},
 		Pause() {
 			const context = getContext();
 			context.isPlaying = false;
-			window.speechSynthesis.pause();
+			
+			// Only pause if currently speaking and the browser supports pausing
+			if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
+				window.speechSynthesis.pause();
+			}
 		},
 		Restart() {
 			const context = getContext();

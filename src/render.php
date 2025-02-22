@@ -131,7 +131,6 @@ $class_options = $attributes['classOptions'] ?? '';
 					class="wp-block-mosne-text-to-speech__select"
 					data-wp-on--change="actions.changeVoice"
 				>
-					>
 					<template data-wp-each--voice="state.voices">
 						<option
 							data-wp-text="context.voice.name"
