@@ -290,14 +290,74 @@ const {
       }
     },
     changeSpeed(e) {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      context.isPlaying = false;
+
+      // Cancel current speech
+      window.speechSynthesis.cancel();
+
+      // Update state
       state.currentSpeed = e.target.value;
       window.localStorage.setItem('mosne-tts-speed-' + document.documentElement.lang, e.target.value);
-      actions.updateUtterance();
+
+      // Check if synthesis is ready using a promise
+      const checkSynthesisReady = () => {
+        return new Promise(resolve => {
+          const check = () => {
+            if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+              resolve();
+            } else {
+              setTimeout(check, 100);
+            }
+          };
+          check();
+        });
+      };
+
+      // Wait for synthesis to be ready before creating new utterance
+      checkSynthesisReady().then(() => {
+        actions.createUtterance();
+        if (context.isPlaying) {
+          setTimeout(() => {
+            window.speechSynthesis.speak(state.utterance);
+          }, 50);
+        }
+      });
     },
     changePitch(e) {
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      context.isPlaying = false;
+
+      // Cancel current speech
+      window.speechSynthesis.cancel();
+
+      // Update state
       state.currentPitch = e.target.value;
       window.localStorage.setItem('mosne-tts-pitch-' + document.documentElement.lang, e.target.value);
-      actions.updateUtterance();
+
+      // Check if synthesis is ready using a promise
+      const checkSynthesisReady = () => {
+        return new Promise(resolve => {
+          const check = () => {
+            if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+              resolve();
+            } else {
+              setTimeout(check, 100);
+            }
+          };
+          check();
+        });
+      };
+
+      // Wait for synthesis to be ready before creating new utterance
+      checkSynthesisReady().then(() => {
+        actions.createUtterance();
+        if (context.isPlaying) {
+          setTimeout(() => {
+            window.speechSynthesis.speak(state.utterance);
+          }, 50);
+        }
+      });
     },
     toggleSettings() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
