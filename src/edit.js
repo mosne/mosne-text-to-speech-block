@@ -20,6 +20,8 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl, // eslint-disable-line
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
+	PanelRow,
+	ColorPalette,
 } from '@wordpress/components';
 
 /**
@@ -35,7 +37,7 @@ import {
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { label, classOptions } = attributes;
+	const { label, classOptions, highlightBackground, highlightColor } = attributes;
 	const blockProps = useBlockProps( {
 		className: classOptions,
 	} );
@@ -71,6 +73,26 @@ export default function Edit( { attributes, setAttributes } ) {
 							value="has-icon has-label"
 						/>
 					</ToggleGroupControl>
+				</PanelBody>
+				<PanelBody title={ __( 'Highlight Settings', 'mosne-text-to-speech-block' ) }>
+					<PanelRow>
+						<div>
+							<p>{ __( 'Highlight Background Color', 'mosne-text-to-speech-block' ) }</p>
+							<ColorPalette
+								value={ highlightBackground }
+								onChange={ ( value ) => setAttributes( { highlightBackground: value } ) }
+							/>
+						</div>
+					</PanelRow>
+					<PanelRow>
+						<div>
+							<p>{ __( 'Highlight Text Color', 'mosne-text-to-speech-block' ) }</p>
+							<ColorPalette
+								value={ highlightColor }
+								onChange={ ( value ) => setAttributes( { highlightColor: value } ) }
+							/>
+						</div>
+					</PanelRow>
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>

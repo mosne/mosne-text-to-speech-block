@@ -21,6 +21,8 @@ $class_options = $attributes['classOptions'] ?? '';
 	<?php echo wp_kses_data( get_block_wrapper_attributes( array( 'class' => 'skip-speech ' . $class_options ) ) ); ?>
 	data-wp-interactive="mosne-text-to-speech-block"
 	data-wp-init="callbacks.init"
+	data-highlight-background="<?php echo esc_attr( $attributes['highlightBackground'] ); ?>"
+	data-highlight-color="<?php echo esc_attr( $attributes['highlightColor'] ); ?>"
 	<?php
 	echo wp_kses_data(
 		wp_interactivity_data_wp_context(

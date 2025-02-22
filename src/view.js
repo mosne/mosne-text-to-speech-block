@@ -71,13 +71,14 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			newUtterance.onboundary = function(event) {
 				if (!mainElement) return;
 
-				// Remove previous highlights
+				// Remove previous highlights by unwrapping
 				const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
-				highlighted.forEach(el => {
-					const parent = el.parentNode;
+				highlighted.forEach(wrapper => {
+					// Replace the wrapper with its text content
+					const parent = wrapper.parentNode;
 					parent.replaceChild(
-						document.createTextNode(el.textContent),
-						el
+						document.createTextNode(wrapper.textContent),
+						wrapper
 					);
 				});
 
@@ -86,62 +87,66 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					return;
 				}
 
-				const range = document.createRange();
-				const walker = document.createTreeWalker(
-					mainElement,
-					NodeFilter.SHOW_TEXT,
-					{
-						acceptNode: function(node) {
-							// Check if the node or any of its ancestors has the skip-speech class
-							let current = node.parentElement;
-							while (current) {
-								if (current.classList && current.classList.contains('skip-speech')) {
-									return NodeFilter.FILTER_REJECT;
+				try {
+					const walker = document.createTreeWalker(
+						mainElement,
+						NodeFilter.SHOW_TEXT,
+						{
+							acceptNode: function(node) {
+								let current = node.parentElement;
+								while (current) {
+									if (current.classList && current.classList.contains('skip-speech')) {
+										return NodeFilter.FILTER_REJECT;
+									}
+									current = current.parentElement;
 								}
-								current = current.parentElement;
+								return NodeFilter.FILTER_ACCEPT;
 							}
-							return NodeFilter.FILTER_ACCEPT;
+						},
+						false
+					);
+
+					let charCount = 0;
+					let node;
+					
+					// Find the text node that contains the current position
+					while ((node = walker.nextNode())) {
+						const nodeLength = node.length;
+						if (charCount + nodeLength > event.charIndex) {
+							// Found the node containing the current position
+							const blockWrapper = document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
+							const highlightBackground = blockWrapper?.dataset.highlightBackground || '#ffeb3b';
+							const highlightColor = blockWrapper?.dataset.highlightColor || '#000000';
+							
+							// Create wrapper span
+							const wrapper = document.createElement('span');
+							wrapper.className = 'mosne-tts-highlighted-word';
+							wrapper.style.setProperty('--mosne-tts-highlight-bg', highlightBackground);
+							wrapper.style.setProperty('--mosne-tts-highlight-color', highlightColor);
+							
+							// Wrap the text content
+							wrapper.textContent = node.textContent;
+							node.parentNode.replaceChild(wrapper, node);
+							break;
 						}
-					},
-					false
-				);
-
-				let charCount = 0;
-				let startContainer = null;
-				let startOffset = 0;
-				let endContainer = null;
-				let endOffset = 0;
-
-				// Find the text node and offset for highlighting
-				let node;
-				while ((node = walker.nextNode())) {
-					const nodeLength = node.length;
-					if (!startContainer && charCount + nodeLength > event.charIndex) {
-						startContainer = node;
-						startOffset = event.charIndex - charCount;
+						charCount += nodeLength;
 					}
-					if (startContainer && charCount + nodeLength > event.charIndex + event.charLength) {
-						endContainer = node;
-						endOffset = Math.min(event.charIndex + event.charLength - charCount, node.length);
-						break;
-					}
-					charCount += nodeLength;
+				} catch (e) {
+					console.error('Highlighting error:', e);
 				}
+			};
 
-				// Only proceed if we found valid start and end points
-				if (startContainer && endContainer && 
-					startOffset <= startContainer.length && 
-					endOffset <= endContainer.length) {
-					try {
-						range.setStart(startContainer, startOffset);
-						range.setEnd(endContainer, endOffset);
-						
-						const span = document.createElement('span');
-						span.className = 'mosne-tts-highlighted-word';
-						range.surroundContents(span);
-					} catch (e) {
-						// Silently handle any range errors
-					}
+			// Update the onend event handler to unwrap text
+			newUtterance.onend = function() {
+				if (mainElement) {
+					const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+					highlighted.forEach(wrapper => {
+						const parent = wrapper.parentNode;
+						parent.replaceChild(
+							document.createTextNode(wrapper.textContent),
+							wrapper
+						);
+					});
 				}
 			};
 
@@ -307,12 +312,17 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 	callbacks: {
 		init() {
 			// Initialize voices when available
-			if ( window.speechSynthesis ) {
+			if (window.speechSynthesis) {
 				window.speechSynthesis.cancel();
 				actions.loadVoices();
-				if ( window.speechSynthesis.onvoiceschanged !== undefined ) {
+				if (window.speechSynthesis.onvoiceschanged !== undefined) {
 					window.speechSynthesis.onvoiceschanged = actions.loadVoices;
 				}
+
+				// Add beforeunload event listener
+				window.addEventListener('beforeunload', () => {
+					window.speechSynthesis.cancel();
+				});
 			}
 		},
 		isSelected() {
@@ -383,8 +393,8 @@ class TextToSpeechManager {
 const style = document.createElement('style');
 style.textContent = `
 	.mosne-tts-highlighted-word {
-		outline: 2px solid currentColor;
-		outline-offset: 3px;
+		background-color: var(--mosne-tts-highlight-bg, #ffeb3b);
+		color: var(--mosne-tts-highlight-color, #000000);
 	}
 `;
 document.head.appendChild(style);
