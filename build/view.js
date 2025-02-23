@@ -113,7 +113,9 @@ const {
       // Get the main element for highlighting
       const mainElement = document.querySelector('main');
       newUtterance.onboundary = function (event) {
-        if (!mainElement) return;
+        if (!mainElement) {
+          return;
+        }
 
         // Remove previous highlights by unwrapping
         const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
@@ -129,7 +131,7 @@ const {
         }
         try {
           const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
-            acceptNode: function (node) {
+            acceptNode(node) {
               let current = node.parentElement;
               while (current) {
                 if (current.classList && current.classList.contains('skip-speech')) {
@@ -166,7 +168,7 @@ const {
             charCount += nodeLength;
           }
         } catch (e) {
-          console.error('Highlighting error:', e);
+          // silent error
         }
       };
 
@@ -413,10 +415,6 @@ class TextToSpeechManager {
     this.utterance = new SpeechSynthesisUtterance(text);
     this.highlightedElement = element;
     this.originalText = text;
-
-    // Split text into words while preserving punctuation
-    const words = text.match(/[\w'-]+|[.,!?;]|\s+/g);
-    let currentIndex = 0;
     this.utterance.onboundary = event => {
       if (event.name === 'word') {
         // Remove previous highlighting

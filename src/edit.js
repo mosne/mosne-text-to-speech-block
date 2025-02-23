@@ -22,12 +22,7 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
 	PanelRow,
-	Button,
-	ColorIndicator,
-	Popover,
-	ColorPalette,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
 import ButtonColorPopover from './components/ButtonColorPopover';
 
 /**
@@ -113,7 +108,7 @@ export default function Edit( { attributes, setAttributes } ) {
 									setAttributes( {
 										highlightBackground: value,
 									} )
-								}P
+								}
 								label={ __(
 									'Background',
 									'mosne-text-to-speech-block'

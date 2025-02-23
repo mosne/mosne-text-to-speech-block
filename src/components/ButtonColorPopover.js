@@ -15,8 +15,8 @@ const ButtonColorPopover = ( { currentColor, colors, onChange, label } ) => {
 	return (
 		<div className="components-base-control">
 			<div className="components-base-control__field">
-				<label className="components-base-control__label">
-					<h3 class="components-truncate components-text components-heading">
+				<span className="components-base-control__label">
+					<h3 className="components-truncate components-text components-heading">
 						{ label }
 					</h3>
 					<Button
@@ -25,7 +25,7 @@ const ButtonColorPopover = ( { currentColor, colors, onChange, label } ) => {
 					>
 						<ColorIndicator colorValue={ currentColor } />
 					</Button>
-				</label>
+				</span>
 				{ isVisible && (
 					<Popover
 						position="bottom left"

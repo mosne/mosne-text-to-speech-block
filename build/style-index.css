@@ -18,6 +18,10 @@
   display: grid;
   gap: 1rem;
 }
+.wp-block-mosne-text-to-speech__controls {
+  display: flex;
+  gap: 1rem;
+}
 .wp-block-mosne-text-to-speech__button.wp-element-button {
   padding: 0.5rem 1rem;
   white-space: nowrap;
@@ -66,7 +70,7 @@
 
 .mosne-tts-highlighted-word {
   background-color: var(--mosne-tts-highlight-bg, #ffeb3b);
-  color: var(--mosne-tts-highlight-color, #000000);
+  color: var(--mosne-tts-highlight-color, #000);
 }
 
 /*# sourceMappingURL=style-index.css.map*/

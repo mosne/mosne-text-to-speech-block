@@ -69,7 +69,9 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			const mainElement = document.querySelector( 'main' );
 
 			newUtterance.onboundary = function ( event ) {
-				if ( ! mainElement ) return;
+				if ( ! mainElement ) {
+					return;
+				}
 
 				// Remove previous highlights by unwrapping
 				const highlighted = mainElement.querySelectorAll(
@@ -98,7 +100,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						mainElement,
 						NodeFilter.SHOW_TEXT,
 						{
-							acceptNode: function ( node ) {
+							acceptNode( node ) {
 								let current = node.parentElement;
 								while ( current ) {
 									if (
@@ -155,7 +157,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						charCount += nodeLength;
 					}
 				} catch ( e ) {
-					console.error( 'Highlighting error:', e );
+					// silent error
 				}
 			};
 
@@ -448,10 +450,6 @@ class TextToSpeechManager {
 		this.utterance = new SpeechSynthesisUtterance( text );
 		this.highlightedElement = element;
 		this.originalText = text;
-
-		// Split text into words while preserving punctuation
-		const words = text.match( /[\w'-]+|[.,!?;]|\s+/g );
-		let currentIndex = 0;
 
 		this.utterance.onboundary = ( event ) => {
 			if ( event.name === 'word' ) {
