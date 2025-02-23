@@ -22,59 +22,8 @@ import {
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
 	PanelRow,
-	Button,
-	ColorIndicator,
-	Popover,
-	ColorPalette,
 } from '@wordpress/components';
-import { useState } from '@wordpress/element';
-
-const ButtonColorPopover = ({ 
-	currentColor,
-	colors,
-	onChange,
-	label
-}) => {
-	const [isVisible, setIsVisible] = useState(false);
-	const toggleVisible = () => {
-		setIsVisible((state) => !state);
-	};
-
-	return (
-		<div className="components-base-control">
-			<div className="components-base-control__field">
-				<label className="components-base-control__label">
-				<h3 class="components-truncate components-text components-heading">{label}</h3>
-					<Button onClick={toggleVisible} style={{ padding: 0, marginLeft: '8px' }}>
-						<ColorIndicator colorValue={currentColor} />
-					</Button>
-				</label>
-				{isVisible && (
-					<Popover
-						position="bottom left"
-						onFocusOutside={() => {
-							if (isVisible) {
-								setIsVisible(false);
-							}
-						}}
-					>
-						<div style={{ padding: 8 }}>
-							<ColorPalette
-								colors={colors}
-								value={currentColor}
-								onChange={(value) => {
-									onChange(value);
-									setIsVisible(false);
-								}}
-								clearable={true}
-							/>
-						</div>
-					</Popover>
-				)}
-			</div>
-		</div>
-	);
-};
+import ButtonColorPopover from './components/ButtonColorPopover';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -89,7 +38,8 @@ const ButtonColorPopover = ({
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { label, classOptions, highlightBackground, highlightColor } = attributes;
+	const { label, classOptions, highlightBackground, highlightColor } =
+		attributes;
 	const blockProps = useBlockProps( {
 		className: classOptions,
 	} );
@@ -130,24 +80,41 @@ export default function Edit( { attributes, setAttributes } ) {
 						/>
 					</ToggleGroupControl>
 				</PanelBody>
-				<PanelBody title={ __( 'Highlight Settings', 'mosne-text-to-speech-block' ) }>
+				<PanelBody
+					title={ __(
+						'Highlight Settings',
+						'mosne-text-to-speech-block'
+					) }
+				>
 					<PanelRow>
-					<div style={{ flex: '1 1 50%' }}>
-						<ButtonColorPopover
-							currentColor={highlightColor}
-							colors={colors}
-							onChange={(value) => setAttributes({ highlightColor: value })}
-							label={__('Text', 'mosne-text-to-speech-block')}
-						/>
-					</div>
-					<div style={{ flex: '1 1 50%' }}>
-						<ButtonColorPopover
-							currentColor={highlightBackground}
-							colors={colors}
-							onChange={(value) => setAttributes({ highlightBackground: value })}
-							label={__('Background', 'mosne-text-to-speech-block')}
-						/>
-					</div>
+						<div style={ { flex: '1 1 50%' } }>
+							<ButtonColorPopover
+								currentColor={ highlightColor }
+								colors={ colors }
+								onChange={ ( value ) =>
+									setAttributes( { highlightColor: value } )
+								}
+								label={ __(
+									'Text',
+									'mosne-text-to-speech-block'
+								) }
+							/>
+						</div>
+						<div style={ { flex: '1 1 50%' } }>
+							<ButtonColorPopover
+								currentColor={ highlightBackground }
+								colors={ colors }
+								onChange={ ( value ) =>
+									setAttributes( {
+										highlightBackground: value,
+									} )
+								}
+								label={ __(
+									'Background',
+									'mosne-text-to-speech-block'
+								) }
+							/>
+						</div>
 					</PanelRow>
 				</PanelBody>
 			</InspectorControls>

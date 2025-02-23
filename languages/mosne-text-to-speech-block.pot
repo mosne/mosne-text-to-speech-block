@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: Mosne Text to Speech Block 0.1.1\n"
+"Project-Id-Version: Mosne Text to Speech Block 0.2.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/mosne-text-to-speech-block\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2025-02-22T11:27:03+00:00\n"
+"POT-Creation-Date: 2025-02-23T13:07:59+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: mosne-text-to-speech-block\n"
@@ -30,67 +30,82 @@ msgstr ""
 msgid "https://mosne.it"
 msgstr ""
 
-#: build/render.php:55
+#: build/render.php:57
 #: build/index.js:1
-#: build/index.js:112
+#: build/index.js:214
 msgid "Play"
 msgstr ""
 
-#: build/render.php:69
+#: build/render.php:71
 msgid "Pause"
 msgstr ""
 
-#: build/render.php:83
+#: build/render.php:85
 msgid "Restart"
 msgstr ""
 
-#: build/render.php:96
+#: build/render.php:98
 msgid "Show Settings"
 msgstr ""
 
-#: build/render.php:108
+#: build/render.php:110
 msgid "Hide settings"
 msgstr ""
 
-#: build/render.php:116
+#: build/render.php:118
 msgid "Speed"
 msgstr ""
 
-#: build/render.php:122
+#: build/render.php:124
 msgid "Pitch"
 msgstr ""
 
-#: build/render.php:128
+#: build/render.php:130
 msgid "Voice"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:47
-#: build/index.js:131
+#: build/index.js:112
+#: build/index.js:233
 msgid "Settings"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:53
+#: build/index.js:118
 msgid "Options"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:59
+#: build/index.js:124
 msgid "Icon"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:63
+#: build/index.js:128
 msgid "Label"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:70
+#: build/index.js:135
 msgid "Both"
 msgstr ""
 
 #: build/index.js:1
-#: build/index.js:86
+#: build/index.js:141
+msgid "Highlight Settings"
+msgstr ""
+
+#: build/index.js:1
+#: build/index.js:154
+msgid "Text"
+msgstr ""
+
+#: build/index.js:1
+#: build/index.js:169
+msgid "Background"
+msgstr ""
+
+#: build/index.js:1
+#: build/index.js:188
 msgid "Listen to this article"
 msgstr ""

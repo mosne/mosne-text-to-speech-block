@@ -11,7 +11,8 @@ No third-party services are used, so no cookies are required. RGPD-friendly. Acc
 ### Key Features
 
 * Listen to the content of a page according to the document language and user's preferences.
-* skip undesired content adding the class .skip-speech to the element.
+* (New) Highlight the current sentence being spoken with custom colors.
+* Skip undesired content adding the class .skip-speech to the element.
 * Accessibility-ready
 * No cookies used (GDPR-friendly)
 * Performance-optimized and lightweight
@@ -45,12 +46,17 @@ You can skip some content adding the class ```.skip-speech``` to the element.
 1. Example of the plugin in action
    ![screenshot-1](https://github.com/mosne/mosne-text-to-speech-block/blob/main/.wordpress-org/screenshot-1.gif)
 
-## Copyright
+## Credits
 
 The icons onf this blocks come from Heroicons with MIT licenses
 [heroicons.com](https://heroicons.com/)
 
 ## Changelog
+
+### 0.2.0 - 2025-02-23
+
+* Highlight the current sentence being spoken with custom colors.
+* Minor bug fixes and improvements.
 
 ### 0.1.1 - 2025-02-05
 
