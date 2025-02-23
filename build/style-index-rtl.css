@@ -63,3 +63,8 @@
 .wp-block-mosne-text-to-speech.has-label.hide-icon .wp-element-button svg {
   display: none;
 }
+
+.mosne-tts-highlighted-word {
+  background-color: var(--mosne-tts-highlight-bg, #ffeb3b);
+  color: var(--mosne-tts-highlight-color, #000000);
+}

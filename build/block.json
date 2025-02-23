@@ -69,7 +69,7 @@
     },
     "highlightColor": {
       "type": "string",
-      "default": "#ffffff"
+      "default": "#000000"
     }
   },
   "textdomain": "mosne-text-to-speech",

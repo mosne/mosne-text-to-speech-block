@@ -450,16 +450,6 @@ class TextToSpeechManager {
     }
   }
 }
-
-// Add CSS styles for highlighting
-const style = document.createElement('style');
-style.textContent = `
-	.mosne-tts-highlighted-word {
-		background-color: var(--mosne-tts-highlight-bg, #ffeb3b);
-		color: var(--mosne-tts-highlight-color, #000000);
-	}
-`;
-document.head.appendChild(style);
 })();
 
 

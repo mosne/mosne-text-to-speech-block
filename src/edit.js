@@ -15,14 +15,66 @@ import {
 	RichText,
 	useBlockProps,
 	InspectorControls,
+	useSetting,
 } from '@wordpress/block-editor';
 import {
 	__experimentalToggleGroupControl as ToggleGroupControl, // eslint-disable-line
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
 	PanelRow,
+	Button,
+	ColorIndicator,
+	Popover,
 	ColorPalette,
 } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+
+const ButtonColorPopover = ({ 
+	currentColor,
+	colors,
+	onChange,
+	label
+}) => {
+	const [isVisible, setIsVisible] = useState(false);
+	const toggleVisible = () => {
+		setIsVisible((state) => !state);
+	};
+
+	return (
+		<div className="components-base-control">
+			<div className="components-base-control__field">
+				<label className="components-base-control__label">
+				<h3 class="components-truncate components-text components-heading">{label}</h3>
+					<Button onClick={toggleVisible} style={{ padding: 0, marginLeft: '8px' }}>
+						<ColorIndicator colorValue={currentColor} />
+					</Button>
+				</label>
+				{isVisible && (
+					<Popover
+						position="bottom left"
+						onFocusOutside={() => {
+							if (isVisible) {
+								setIsVisible(false);
+							}
+						}}
+					>
+						<div style={{ padding: 8 }}>
+							<ColorPalette
+								colors={colors}
+								value={currentColor}
+								onChange={(value) => {
+									onChange(value);
+									setIsVisible(false);
+								}}
+								clearable={true}
+							/>
+						</div>
+					</Popover>
+				)}
+			</div>
+		</div>
+	);
+};
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -41,6 +93,10 @@ export default function Edit( { attributes, setAttributes } ) {
 	const blockProps = useBlockProps( {
 		className: classOptions,
 	} );
+
+	const colorsTheme = useSetting( 'color.palette.theme' ) || [];
+	const colorsCustom = useSetting( 'color.palette.custom' ) || [];
+	const colors = colorsTheme.concat( colorsCustom );
 
 	return (
 		<>
@@ -76,22 +132,22 @@ export default function Edit( { attributes, setAttributes } ) {
 				</PanelBody>
 				<PanelBody title={ __( 'Highlight Settings', 'mosne-text-to-speech-block' ) }>
 					<PanelRow>
-						<div>
-							<p>{ __( 'Highlight Background Color', 'mosne-text-to-speech-block' ) }</p>
-							<ColorPalette
-								value={ highlightBackground }
-								onChange={ ( value ) => setAttributes( { highlightBackground: value } ) }
-							/>
-						</div>
-					</PanelRow>
-					<PanelRow>
-						<div>
-							<p>{ __( 'Highlight Text Color', 'mosne-text-to-speech-block' ) }</p>
-							<ColorPalette
-								value={ highlightColor }
-								onChange={ ( value ) => setAttributes( { highlightColor: value } ) }
-							/>
-						</div>
+					<div style={{ flex: '1 1 50%' }}>
+						<ButtonColorPopover
+							currentColor={highlightColor}
+							colors={colors}
+							onChange={(value) => setAttributes({ highlightColor: value })}
+							label={__('Text', 'mosne-text-to-speech-block')}
+						/>
+					</div>
+					<div style={{ flex: '1 1 50%' }}>
+						<ButtonColorPopover
+							currentColor={highlightBackground}
+							colors={colors}
+							onChange={(value) => setAttributes({ highlightBackground: value })}
+							label={__('Background', 'mosne-text-to-speech-block')}
+						/>
+					</div>
 					</PanelRow>
 				</PanelBody>
 			</InspectorControls>
