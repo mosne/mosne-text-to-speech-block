@@ -1,0 +1,33 @@
+{
+	"root": true,
+	"extends": [
+		"plugin:@wordpress/eslint-plugin/recommended"
+	],
+	"env": {
+		"browser": true,
+		"es6": true,
+		"node": true
+	},
+	"globals": {
+		"NodeFilter": "readonly",
+		"SpeechSynthesisUtterance": "readonly",
+		"speechSynthesis": "readonly"
+	},
+	"rules": {
+		"no-console": ["error", { "allow": ["warn", "error"] }],
+		"no-unused-vars": ["error", { "varsIgnorePattern": "TextToSpeechManager" }],
+		"@wordpress/no-unsafe-wp-apis": "off"
+	},
+	"settings": {
+		"react": {
+			"version": "detect"
+		}
+	},
+	"parserOptions": {
+		"ecmaVersion": 2021,
+		"sourceType": "module",
+		"ecmaFeatures": {
+			"jsx": true
+		}
+	}
+} 

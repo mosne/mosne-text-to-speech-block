@@ -15,12 +15,15 @@ import {
 	RichText,
 	useBlockProps,
 	InspectorControls,
+	useSetting,
 } from '@wordpress/block-editor';
 import {
 	__experimentalToggleGroupControl as ToggleGroupControl, // eslint-disable-line
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
+	PanelRow,
 } from '@wordpress/components';
+import ButtonColorPopover from './components/ButtonColorPopover';
 
 /**
  * The edit function describes the structure of your block in the context of the
@@ -35,10 +38,15 @@ import {
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { label, classOptions } = attributes;
+	const { label, classOptions, highlightBackground, highlightColor } =
+		attributes;
 	const blockProps = useBlockProps( {
 		className: classOptions,
 	} );
+
+	const colorsTheme = useSetting( 'color.palette.theme' ) || [];
+	const colorsCustom = useSetting( 'color.palette.custom' ) || [];
+	const colors = colorsTheme.concat( colorsCustom );
 
 	return (
 		<>
@@ -71,6 +79,43 @@ export default function Edit( { attributes, setAttributes } ) {
 							value="has-icon has-label"
 						/>
 					</ToggleGroupControl>
+				</PanelBody>
+				<PanelBody
+					title={ __(
+						'Highlight Settings',
+						'mosne-text-to-speech-block'
+					) }
+				>
+					<PanelRow>
+						<div style={ { flex: '1 1 50%' } }>
+							<ButtonColorPopover
+								currentColor={ highlightColor }
+								colors={ colors }
+								onChange={ ( value ) =>
+									setAttributes( { highlightColor: value } )
+								}
+								label={ __(
+									'Text',
+									'mosne-text-to-speech-block'
+								) }
+							/>
+						</div>
+						<div style={ { flex: '1 1 50%' } }>
+							<ButtonColorPopover
+								currentColor={ highlightBackground }
+								colors={ colors }
+								onChange={ ( value ) =>
+									setAttributes( {
+										highlightBackground: value,
+									} )
+								}
+								label={ __(
+									'Background',
+									'mosne-text-to-speech-block'
+								) }
+							/>
+						</div>
+					</PanelRow>
 				</PanelBody>
 			</InspectorControls>
 			<div { ...blockProps }>
