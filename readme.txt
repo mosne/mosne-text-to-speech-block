@@ -1,10 +1,10 @@
 === Mosne Text to Speech Block ===
 Contributors:      mosne
-Tags:              block, speech, accessibility, audio
+Tags:              block, speech, accessibility, audio, tts
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        0.1.1
+Stable tag:        0.2.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,7 +19,8 @@ No third-party services are used, so no cookies are required. RGPD-friendly. Acc
 == Key Features ==
 
 * Listen to the content of a page according to the document language and user's preferences.
-* skip undesired content adding the class .skip-speech to the element.
+* (New) Highlight the current sentence being spoken with custom colors.
+* Skip undesired content adding the class .skip-speech to the element.
 * Accessibility-ready
 * No cookies used (GDPR-friendly)
 * Performance-optimized and lightweight
@@ -59,6 +60,6 @@ You can skip some content adding the class `.skip-speech` to the element.
 
 * Initial release
 
-=== copyright ===
+=== Credits ===
 The icons onf this blocks come from Heroicons with MIT licenses
 [heroicons.com](https://heroicons.com/)
