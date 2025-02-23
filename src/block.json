@@ -59,6 +59,14 @@
 		"classOptions": {
 			"type": "string",
 			"default": "has-icon has-label"
+		},
+		"highlightBackground": {
+			"type": "string",
+			"default": "#ffeb3b"
+		},
+		"highlightColor": {
+			"type": "string",
+			"default": "#000000"
 		}
 	},
 	"textdomain": "mosne-text-to-speech",
