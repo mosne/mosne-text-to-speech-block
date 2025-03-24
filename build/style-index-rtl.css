@@ -68,7 +68,7 @@
   display: none;
 }
 
-.mosne-tts-highlighted-word {
+.mosne-tts-highlighted-section {
   background-color: var(--mosne-tts-highlight-bg, #ffeb3b);
   color: var(--mosne-tts-highlight-color, #000);
 }

@@ -120,7 +120,7 @@ const {
       if (!mainElement) {
         return;
       }
-      const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+      const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-section');
       highlighted.forEach(el => {
         const parent = el.parentNode;
         parent.replaceChild(document.createTextNode(el.textContent), el);
@@ -128,7 +128,7 @@ const {
     },
     createHighlightWrapper(background, color) {
       const wrapper = document.createElement('span');
-      wrapper.className = 'mosne-tts-highlighted-word';
+      wrapper.className = 'mosne-tts-highlighted-section';
       wrapper.style.backgroundColor = background;
       wrapper.style.color = color;
       return wrapper;

@@ -79,7 +79,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			}
 
 			const highlighted = mainElement.querySelectorAll(
-				'.mosne-tts-highlighted-word'
+				'.mosne-tts-highlighted-section'
 			);
 			highlighted.forEach( ( el ) => {
 				const parent = el.parentNode;
@@ -92,7 +92,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 		createHighlightWrapper( background, color ) {
 			const wrapper = document.createElement( 'span' );
-			wrapper.className = 'mosne-tts-highlighted-word';
+			wrapper.className = 'mosne-tts-highlighted-section';
 			wrapper.style.backgroundColor = background;
 			wrapper.style.color = color;
 			return wrapper;
