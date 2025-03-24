@@ -116,7 +116,8 @@ const {
     currentChunk: 0,
     textChunks: [],
     isProcessingChunks: false,
-    currentHighlightedNode: null
+    currentHighlightedNode: null,
+    nodePositions: new Map()
   },
   actions: {
     // Speech Synthesis Management
@@ -403,6 +404,14 @@ const {
           });
 
           // Find the node containing the current position
+          const findTargetNode = charIndex => {
+            for (const [position, data] of state.nodePositions) {
+              if (charIndex >= position && charIndex < position + data.length) {
+                return data.node;
+              }
+            }
+            return null;
+          };
           let charCount = 0;
           let targetNode = null;
           let node;
@@ -475,6 +484,32 @@ const {
     }
   }
 });
+const updateHighlight = (targetNode, background, color) => {
+  requestAnimationFrame(() => {
+    actions.clearHighlights();
+    const wrapper = actions.createHighlightWrapper(background, color);
+    wrapper.textContent = targetNode.textContent;
+    targetNode.parentNode.replaceChild(wrapper, targetNode);
+    state.currentHighlightedNode = wrapper.firstChild;
+  });
+};
+const calculateNodePositions = () => {
+  const walker = document.createTreeWalker(getMainElement(), NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      return isLeafNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  let charCount = 0;
+  let node;
+  state.nodePositions.clear();
+  while (node = walker.nextNode()) {
+    state.nodePositions.set(charCount, {
+      node,
+      length: node.textContent.length
+    });
+    charCount += node.textContent.length;
+  }
+};
 })();
 
 
