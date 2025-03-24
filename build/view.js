@@ -62,6 +62,25 @@ __webpack_require__.r(__webpack_exports__);
  * WordPress dependencies
  */
 
+
+// Constants
+const STORAGE_KEYS = {
+  LANG: lang => `mosne-tts-lang-${lang}`,
+  SPEED: lang => `mosne-tts-speed-${lang}`,
+  PITCH: lang => `mosne-tts-pitch-${lang}`
+};
+const DEFAULTS = {
+  HIGHLIGHT_BG: '#ffeb3b',
+  HIGHLIGHT_COLOR: '#000000',
+  EXCLUDE_CLASS: 'skip-speech',
+  WORDS_PER_CHUNK: 200
+};
+
+// Helper functions
+const getLocalStorageItem = (key, defaultValue) => window.localStorage.getItem(key) || defaultValue;
+const getCurrentLocale = () => document.documentElement.lang;
+const getBlockWrapper = () => document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
+const getMainElement = () => document.querySelector('main');
 const {
   state,
   actions
@@ -69,11 +88,11 @@ const {
   state: {
     isPlaying: false,
     currentVoice: null,
-    preferredVoice: window.localStorage.getItem('mosne-tts-lang-' + document.documentElement.lang) || null,
+    preferredVoice: getLocalStorageItem(STORAGE_KEYS.LANG(getCurrentLocale()), null),
     utterance: null,
     voices: [],
-    currentSpeed: window.localStorage.getItem('mosne-tts-speed-' + document.documentElement.lang) || 1,
-    currentPitch: window.localStorage.getItem('mosne-tts-pitch-' + document.documentElement.lang) || 1,
+    currentSpeed: getLocalStorageItem(STORAGE_KEYS.SPEED(getCurrentLocale()), 1),
+    currentPitch: getLocalStorageItem(STORAGE_KEYS.PITCH(getCurrentLocale()), 1),
     selectedTextRange: {
       hasSelection: false
     },
@@ -82,6 +101,7 @@ const {
     isProcessingChunks: false
   },
   actions: {
+    // Speech Synthesis Management
     checkSynthesisReady() {
       return new Promise(resolve => {
         const check = () => {
@@ -94,206 +114,77 @@ const {
         check();
       });
     },
-    loadVoices() {
+    // Highlighting Management
+    clearHighlights() {
+      const mainElement = getMainElement();
+      if (!mainElement) {
+        return;
+      }
+      const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
+      highlighted.forEach(el => {
+        const parent = el.parentNode;
+        parent.replaceChild(document.createTextNode(el.textContent), el);
+      });
+    },
+    createHighlightWrapper(background, color) {
+      const wrapper = document.createElement('span');
+      wrapper.className = 'mosne-tts-highlighted-word';
+      wrapper.style.backgroundColor = background;
+      wrapper.style.color = color;
+      return wrapper;
+    },
+    // Voice Management
+    async loadVoices() {
       const availableVoices = window.speechSynthesis.getVoices();
-      if (!availableVoices || availableVoices.length === 0) {
-        // If voices aren't available yet, try again after a short delay
+      if (!availableVoices?.length) {
         setTimeout(() => actions.loadVoices(), 100);
         return;
       }
-      state.voices = availableVoices;
-      state.currentVoice = availableVoices[0];
-      const currentLocale = document.documentElement.lang;
+      const currentLocale = getCurrentLocale();
       const localVoices = availableVoices.filter(voice => voice.lang.startsWith(currentLocale));
-      if (localVoices.length > 0) {
-        state.voices = localVoices;
-        state.currentVoice = localVoices[0];
-        if (state.preferredVoice) {
-          const voice = localVoices.find(v => v.voiceURI === state.preferredVoice);
-          if (voice) {
-            state.currentVoice = voice;
-          }
+      state.voices = localVoices.length > 0 ? localVoices : availableVoices;
+      state.currentVoice = state.voices[0];
+      if (state.preferredVoice) {
+        const voice = state.voices.find(v => v.voiceURI === state.preferredVoice);
+        if (voice) {
+          state.currentVoice = voice;
         }
       }
-
-      // Create initial utterance after a small delay
-      setTimeout(() => {
-        actions.createUtterance();
-      }, 50);
+      setTimeout(() => actions.createUtterance(), 50);
     },
+    // Utterance Management
     createUtterance() {
-      // Get current chunk of content
       const content = state.textChunks.length > 0 ? state.textChunks[state.currentChunk] : actions.getContent();
       const newUtterance = new window.SpeechSynthesisUtterance(content);
-      newUtterance.lang = document.documentElement.lang;
+      newUtterance.lang = getCurrentLocale();
       newUtterance.rate = state.currentSpeed;
       newUtterance.pitch = state.currentPitch;
-
-      // Get the main element for highlighting
-      const mainElement = document.querySelector('main');
-      const docView = mainElement?.ownerDocument.defaultView;
-      const selection = docView ? docView.getSelection() : null;
-      newUtterance.onboundary = function (event) {
-        if (!mainElement) {
-          return;
-        }
-
-        // Remove previous highlights by unwrapping
-        const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
-        highlighted.forEach(wrapper => {
-          // Replace the wrapper with its text content
-          const parent = wrapper.parentNode;
-          parent.replaceChild(document.createTextNode(wrapper.textContent), wrapper);
-        });
-
-        // Safety check for valid boundary event
-        if (!event.charIndex || !event.charLength || event.charIndex + event.charLength > content.length) {
-          return;
-        }
-        try {
-          // If we're reading selected text, we need to handle highlighting differently
-          const blockWrapper = document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
-          const highlightBackground = blockWrapper?.dataset.highlightBackground || '#ffeb3b';
-          const highlightColor = blockWrapper?.dataset.highlightColor || '#000000';
-          if (state.selectedTextRange && state.selectedTextRange.hasSelection) {
-            // Create a new highlight for the selection
-            if (selection && selection.rangeCount > 0) {
-              // wrap the selection in a span with the class 'mosne-tts-highlighted-word'
-              const selectionRange = selection.getRangeAt(0);
-              const selectionWrapper = document.createElement('span');
-              selectionWrapper.className = 'mosne-tts-highlighted-word';
-              selectionWrapper.style.setProperty('--mosne-tts-highlight-bg', highlightBackground);
-              selectionWrapper.style.setProperty('--mosne-tts-highlight-color', highlightColor);
-              selectionRange.surroundContents(selectionWrapper);
-            }
-          } else {
-            // Original highlighting logic for main content
-
-            // Get excluded classes from data attribute or use default
-            const excludeClassesStr = blockWrapper?.dataset.excludeClass || 'skip-speech';
-            // Split by spaces to get array of class names to exclude
-            const excludeClasses = excludeClassesStr.split(/\s+/);
-            const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
-              acceptNode(node) {
-                let current = node.parentElement;
-                while (current) {
-                  if (current.classList) {
-                    // Check if element has any of the excluded classes
-                    for (const excludeClass of excludeClasses) {
-                      if (excludeClass && current.classList.contains(excludeClass)) {
-                        return NodeFilter.FILTER_REJECT;
-                      }
-                    }
-                  }
-                  current = current.parentElement;
-                }
-                return NodeFilter.FILTER_ACCEPT;
-              }
-            }, false);
-            let charCount = 0;
-            let node;
-
-            // Find the text node that contains the current position
-            while (node = walker.nextNode()) {
-              const nodeLength = node.length;
-              if (charCount + nodeLength > event.charIndex) {
-                // Found the node containing the current position
-
-                // Create wrapper span
-                const wrapper = document.createElement('span');
-                wrapper.className = 'mosne-tts-highlighted-word';
-                wrapper.style.setProperty('--mosne-tts-highlight-bg', highlightBackground);
-                wrapper.style.setProperty('--mosne-tts-highlight-color', highlightColor);
-
-                // Wrap the text content
-                wrapper.textContent = node.textContent;
-                node.parentNode.replaceChild(wrapper, node);
-                break;
-              }
-              charCount += nodeLength;
-            }
-          }
-        } catch (e) {
-          // silent error
-        }
-      };
-
-      // Update the onend event handler to move to next chunk or finish
-      newUtterance.onend = function () {
-        if (mainElement) {
-          const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
-          highlighted.forEach(wrapper => {
-            const parent = wrapper.parentNode;
-            parent.replaceChild(document.createTextNode(wrapper.textContent), wrapper);
-          });
-        }
-
-        // Check if there are more chunks to process
-        if (state.currentChunk < state.textChunks.length - 1 && state.isPlaying) {
-          // Move to next chunk
-          state.currentChunk++;
-
-          // Create and play next utterance
-          setTimeout(() => {
-            actions.createUtterance();
-            window.speechSynthesis.speak(state.utterance);
-          }, 250); // Brief pause between chunks
-        } else {
-          // Reset chunks and finish
-          state.currentChunk = 0;
-          state.textChunks = [];
-          state.isPlaying = false;
-
-          // Clear selected text range
-          state.selectedTextRange = {
-            hasSelection: false
-          };
-        }
-      };
       if (state.currentVoice) {
         const voice = state.voices.find(v => v.voiceURI === state.currentVoice.voiceURI);
         newUtterance.voice = voice;
       }
+      actions.setupUtteranceEvents(newUtterance, content);
       state.utterance = newUtterance;
     },
-    async updateUtterance() {
-      const utterance = state.utterance;
-      if (utterance) {
-        window.speechSynthesis.cancel();
-        actions.clearHighlights();
-        state.isPlaying = false;
-        await actions.checkSynthesisReady();
-        actions.createUtterance();
-      }
+    setupUtteranceEvents(utterance, content) {
+      utterance.onboundary = event => actions.handleBoundaryEvent(event, content);
+      utterance.onend = () => actions.handleUtteranceEnd();
     },
-    clearHighlights() {
-      const mainElement = document.querySelector('main');
-      if (mainElement) {
-        const highlighted = mainElement.querySelectorAll('.mosne-tts-highlighted-word');
-        highlighted.forEach(el => {
-          const parent = el.parentNode;
-          parent.replaceChild(document.createTextNode(el.textContent), el);
-        });
-      }
-    },
-    Play() {
+    // Playback Controls
+    async Play() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
       context.isPlaying = true;
       state.isPlaying = true;
-
-      // If this is the first play or starting over, get content and create chunks
       if (state.textChunks.length === 0 || state.currentChunk === 0) {
         actions.getContent();
         actions.createUtterance();
       }
-
-      // If paused, just resume
       if (window.speechSynthesis.paused) {
         window.speechSynthesis.resume();
         return;
       }
 
-      // Chrome fix: force reset synthesis if it's in a bad state
+      // Chrome fix
       if (window.speechSynthesis.speaking) {
         window.speechSynthesis.cancel();
         setTimeout(() => {
@@ -303,8 +194,6 @@ const {
         }, 50);
         return;
       }
-
-      // Start new speech if not already speaking
       if (state.utterance) {
         window.speechSynthesis.speak(state.utterance);
       }
@@ -379,7 +268,7 @@ const {
     },
     getContent() {
       // Check if there is highlighted text
-      const mainElement = document.querySelector('main');
+      const mainElement = getMainElement();
       const docView = mainElement?.ownerDocument.defaultView;
       const selection = docView ? docView.getSelection() : null;
       let content = '';
@@ -395,8 +284,8 @@ const {
         let cloneMain = mainElement?.cloneNode(true);
         if (cloneMain) {
           // Use the same exclude classes logic for consistency
-          const blockWrapper = document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
-          const excludeClassesStr = blockWrapper?.dataset.excludeClass || 'skip-speech';
+          const blockWrapper = getBlockWrapper();
+          const excludeClassesStr = blockWrapper?.dataset.excludeClass || DEFAULTS.EXCLUDE_CLASS;
           const excludeClasses = excludeClassesStr.split(/\s+/);
 
           // Remove all elements with excluded classes
@@ -417,7 +306,7 @@ const {
       }
 
       // Process content into chunks of approximately 200 words
-      state.textChunks = actions.chunkText(content, 200);
+      state.textChunks = actions.chunkText(content, DEFAULTS.WORDS_PER_CHUNK);
       state.currentChunk = 0;
 
       // Return the first chunk to start with
@@ -439,23 +328,117 @@ const {
         chunks.push(chunk);
       }
       return chunks;
+    },
+    handleBoundaryEvent(event, content) {
+      const mainElement = getMainElement();
+      if (!mainElement) {
+        return;
+      }
+
+      // Clear previous highlights
+      actions.clearHighlights();
+
+      // Safety check for valid boundary event
+      if (!event.charIndex || !event.charLength || event.charIndex + event.charLength > content.length) {
+        return;
+      }
+      try {
+        const blockWrapper = getBlockWrapper();
+        const highlightBackground = blockWrapper?.dataset.highlightBackground || DEFAULTS.HIGHLIGHT_BG;
+        const highlightColor = blockWrapper?.dataset.highlightColor || DEFAULTS.HIGHLIGHT_COLOR;
+        if (state.selectedTextRange?.hasSelection) {
+          // Handle selected text highlighting
+          const docView = mainElement?.ownerDocument.defaultView;
+          const selection = docView?.getSelection();
+          if (selection?.rangeCount > 0) {
+            const selectionRange = selection.getRangeAt(0);
+            const wrapper = actions.createHighlightWrapper(highlightBackground, highlightColor);
+            try {
+              selectionRange.surroundContents(wrapper);
+            } catch (e) {
+              // Fallback for when surroundContents fails
+              const textContent = selectionRange.toString();
+              wrapper.textContent = textContent;
+              selectionRange.deleteContents();
+              selectionRange.insertNode(wrapper);
+            }
+          }
+        } else {
+          // Handle main content highlighting
+          const excludeClassesStr = blockWrapper?.dataset.excludeClass || DEFAULTS.EXCLUDE_CLASS;
+          const excludeClasses = excludeClassesStr.split(/\s+/);
+
+          // Find the current word being spoken to locate the correct node
+          const text = content;
+          const wordStart = text.lastIndexOf(' ', event.charIndex) + 1;
+          const wordEnd = text.indexOf(' ', event.charIndex);
+          const currentWord = text.substring(wordStart, wordEnd > -1 ? wordEnd : text.length);
+          if (currentWord) {
+            // Create TreeWalker to find text nodes
+            const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
+              acceptNode(node) {
+                // Check if node's parent has excluded classes
+                let current = node.parentElement;
+                while (current) {
+                  if (current.classList) {
+                    for (const excludeClass of excludeClasses) {
+                      if (excludeClass && current.classList.contains(excludeClass)) {
+                        return NodeFilter.FILTER_REJECT;
+                      }
+                    }
+                  }
+                  current = current.parentElement;
+                }
+                return node.textContent.includes(currentWord) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+              }
+            });
+
+            // Find and highlight the first matching text node
+            const node = walker.nextNode();
+            if (node) {
+              const wrapper = actions.createHighlightWrapper(highlightBackground, highlightColor);
+              // Highlight the entire node content
+              wrapper.textContent = node.textContent;
+              node.parentNode.replaceChild(wrapper, node);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Highlighting error:', e);
+      }
+    },
+    handleUtteranceEnd() {
+      // Clear any remaining highlights
+      actions.clearHighlights();
+
+      // Update playing state
+      const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
+      context.isPlaying = false;
+      state.isPlaying = false;
+
+      // Reset chunk tracking
+      state.currentChunk = 0;
+      state.textChunks = [];
+
+      // Clear selected text range
+      state.selectedTextRange = {
+        hasSelection: false
+      };
     }
   },
   callbacks: {
     init() {
-      // Initialize voices when available
-      if (window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        actions.loadVoices();
-        if (window.speechSynthesis.onvoiceschanged !== undefined) {
-          window.speechSynthesis.onvoiceschanged = actions.loadVoices;
-        }
-
-        // Add beforeunload event listener
-        window.addEventListener('beforeunload', () => {
-          window.speechSynthesis.cancel();
-        });
+      if (!window.speechSynthesis) {
+        return;
       }
+      window.speechSynthesis.cancel();
+      actions.loadVoices();
+      if (window.speechSynthesis.onvoiceschanged !== undefined) {
+        window.speechSynthesis.onvoiceschanged = actions.loadVoices;
+      }
+      window.addEventListener('beforeunload', () => {
+        window.speechSynthesis.cancel();
+      });
     },
     isSelected() {
       const context = (0,_wordpress_interactivity__WEBPACK_IMPORTED_MODULE_0__.getContext)();
