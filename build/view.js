@@ -81,6 +81,23 @@ const getLocalStorageItem = (key, defaultValue) => window.localStorage.getItem(k
 const getCurrentLocale = () => document.documentElement.lang;
 const getBlockWrapper = () => document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
 const getMainElement = () => document.querySelector('main');
+const isLeafNode = node => {
+  // Check if this is a text node
+  if (node.nodeType === Node.TEXT_NODE) {
+    return true;
+  }
+
+  // For element nodes, check if they only contain text nodes (no other elements)
+  if (node.nodeType === Node.ELEMENT_NODE) {
+    for (const child of node.childNodes) {
+      if (child.nodeType !== Node.TEXT_NODE) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+};
 const {
   state,
   actions
@@ -98,7 +115,8 @@ const {
     },
     currentChunk: 0,
     textChunks: [],
-    isProcessingChunks: false
+    isProcessingChunks: false,
+    currentHighlightedNode: null
   },
   actions: {
     // Speech Synthesis Management
@@ -335,9 +353,6 @@ const {
         return;
       }
 
-      // Clear previous highlights
-      actions.clearHighlights();
-
       // Safety check for valid boundary event
       if (!event.charIndex || !event.charLength || event.charIndex + event.charLength > content.length) {
         return;
@@ -368,39 +383,50 @@ const {
           const excludeClassesStr = blockWrapper?.dataset.excludeClass || DEFAULTS.EXCLUDE_CLASS;
           const excludeClasses = excludeClassesStr.split(/\s+/);
 
-          // Find the current word being spoken to locate the correct node
-          const text = content;
-          const wordStart = text.lastIndexOf(' ', event.charIndex) + 1;
-          const wordEnd = text.indexOf(' ', event.charIndex);
-          const currentWord = text.substring(wordStart, wordEnd > -1 ? wordEnd : text.length);
-          if (currentWord) {
-            // Create TreeWalker to find text nodes
-            const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
-              acceptNode(node) {
-                // Check if node's parent has excluded classes
-                let current = node.parentElement;
-                while (current) {
-                  if (current.classList) {
-                    for (const excludeClass of excludeClasses) {
-                      if (excludeClass && current.classList.contains(excludeClass)) {
-                        return NodeFilter.FILTER_REJECT;
-                      }
+          // Create TreeWalker to find text nodes
+          const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
+            acceptNode(node) {
+              // Check if node's parent has excluded classes
+              let current = node.parentElement;
+              while (current) {
+                if (current.classList) {
+                  for (const excludeClass of excludeClasses) {
+                    if (excludeClass && current.classList.contains(excludeClass)) {
+                      return NodeFilter.FILTER_REJECT;
                     }
                   }
-                  current = current.parentElement;
                 }
-                return node.textContent.includes(currentWord) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                current = current.parentElement;
               }
-            });
-
-            // Find and highlight the first matching text node
-            const node = walker.nextNode();
-            if (node) {
-              const wrapper = actions.createHighlightWrapper(highlightBackground, highlightColor);
-              // Highlight the entire node content
-              wrapper.textContent = node.textContent;
-              node.parentNode.replaceChild(wrapper, node);
+              return NodeFilter.FILTER_ACCEPT;
             }
+          });
+
+          // Find the node containing the current position
+          let charCount = 0;
+          let targetNode = null;
+          let node;
+          while (node = walker.nextNode()) {
+            const nodeLength = node.textContent.length;
+            if (charCount <= event.charIndex && event.charIndex < charCount + nodeLength && isLeafNode(node)) {
+              targetNode = node;
+              break;
+            }
+            charCount += nodeLength;
+          }
+
+          // Only update highlight if we've found a new leaf node and it's different from the current one
+          if (targetNode && targetNode !== state.currentHighlightedNode && targetNode.textContent.trim().length > 0) {
+            // Clear previous highlight
+            actions.clearHighlights();
+
+            // Create new highlight
+            const wrapper = actions.createHighlightWrapper(highlightBackground, highlightColor);
+            wrapper.textContent = targetNode.textContent;
+            targetNode.parentNode.replaceChild(wrapper, targetNode);
+
+            // Update current node reference
+            state.currentHighlightedNode = wrapper.firstChild;
           }
         }
       } catch (e) {
@@ -419,6 +445,9 @@ const {
       // Reset chunk tracking
       state.currentChunk = 0;
       state.textChunks = [];
+
+      // Reset highlight tracking
+      state.currentHighlightedNode = null;
 
       // Clear selected text range
       state.selectedTextRange = {
