@@ -21,6 +21,7 @@ import {
 	__experimentalToggleGroupControl as ToggleGroupControl, // eslint-disable-line
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption, // eslint-disable-line
 	PanelBody,
+	TextControl,
 	PanelRow,
 } from '@wordpress/components';
 import ButtonColorPopover from './components/ButtonColorPopover';
@@ -38,8 +39,13 @@ import ButtonColorPopover from './components/ButtonColorPopover';
  * @return {Element} Element to render.
  */
 export default function Edit( { attributes, setAttributes } ) {
-	const { label, classOptions, highlightBackground, highlightColor } =
-		attributes;
+	const {
+		label,
+		classOptions,
+		highlightBackground,
+		highlightColor,
+		excludeClass,
+	} = attributes;
 	const blockProps = useBlockProps( {
 		className: classOptions,
 	} );
@@ -111,6 +117,24 @@ export default function Edit( { attributes, setAttributes } ) {
 								}
 								label={ __(
 									'Background',
+									'mosne-text-to-speech-block'
+								) }
+							/>
+						</div>
+					</PanelRow>
+					<PanelRow>
+						<div style={ { flex: '1 1 50%' } }>
+							<TextControl
+								value={ excludeClass }
+								onChange={ ( value ) =>
+									setAttributes( { excludeClass: value } )
+								}
+								label={ __(
+									'Exclude from speech additional CSS class(es)',
+									'mosne-text-to-speech-block'
+								) }
+								help={ __(
+									'Separate multiple classes with spaces.',
 									'mosne-text-to-speech-block'
 								) }
 							/>

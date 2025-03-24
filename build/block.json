@@ -70,6 +70,10 @@
     "highlightColor": {
       "type": "string",
       "default": "#000000"
+    },
+    "excludeClass": {
+      "type": "string",
+      "default": ""
     }
   },
   "textdomain": "mosne-text-to-speech",
