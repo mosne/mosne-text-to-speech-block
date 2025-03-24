@@ -5,7 +5,6 @@
 	"version": "0.2.0",
 	"title": "Text to Speech",
 	"category": "widgets",
-	"icon": "megaphone",
 	"description": "Read the content of of a page using native Speech Synthesis and  Interactivity API.",
 	"example": {},
 	"supports": {
