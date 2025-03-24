@@ -29,6 +29,21 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		isProcessingChunks: false,
 	},
 	actions: {
+		checkSynthesisReady() {
+			return new Promise( ( resolve ) => {
+				const check = () => {
+					if (
+						! window.speechSynthesis.speaking &&
+						! window.speechSynthesis.pending
+					) {
+						resolve();
+					} else {
+						setTimeout( check, 100 );
+					}
+				};
+				check();
+			} );
+		},
 		loadVoices() {
 			const availableVoices = window.speechSynthesis.getVoices();
 			if ( ! availableVoices || availableVoices.length === 0 ) {
@@ -89,6 +104,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				const highlighted = mainElement.querySelectorAll(
 					'.mosne-tts-highlighted-word'
 				);
+
 				highlighted.forEach( ( wrapper ) => {
 					// Replace the wrapper with its text content
 					const parent = wrapper.parentNode;
@@ -109,87 +125,39 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 				try {
 					// If we're reading selected text, we need to handle highlighting differently
+					const blockWrapper = document.querySelector(
+						'[data-wp-interactive="mosne-text-to-speech-block"]'
+					);
+
+					const highlightBackground =
+						blockWrapper?.dataset.highlightBackground || '#ffeb3b';
+					const highlightColor =
+						blockWrapper?.dataset.highlightColor || '#000000';
+
 					if (
 						state.selectedTextRange &&
 						state.selectedTextRange.hasSelection
 					) {
 						// Create a new highlight for the selection
 						if ( selection && selection.rangeCount > 0 ) {
-							const range = selection.getRangeAt( 0 );
-
-							// Create wrapper span
-							const blockWrapper = document.querySelector(
-								'[data-wp-interactive="mosne-text-to-speech-block"]'
-							);
-							const highlightBackground =
-								blockWrapper?.dataset.highlightBackground ||
-								'#ffeb3b';
-							const highlightColor =
-								blockWrapper?.dataset.highlightColor ||
-								'#000000';
-
-							// Highlight the current word within the selection
-							const startOffset = event.charIndex;
-							const endOffset =
-								event.charIndex + event.charLength;
-
-							// Create a temporary span for the current word
-							const wrapper = document.createElement( 'span' );
-							wrapper.className = 'mosne-tts-highlighted-word';
-							wrapper.style.setProperty(
+							// wrap the selection in a span with the class 'mosne-tts-highlighted-word'
+							const selectionRange = selection.getRangeAt( 0 );
+							const selectionWrapper =
+								document.createElement( 'span' );
+							selectionWrapper.className =
+								'mosne-tts-highlighted-word';
+							selectionWrapper.style.setProperty(
 								'--mosne-tts-highlight-bg',
 								highlightBackground
 							);
-							wrapper.style.setProperty(
+							selectionWrapper.style.setProperty(
 								'--mosne-tts-highlight-color',
 								highlightColor
 							);
-
-							// Get the word being spoken
-							const word = content.substring(
-								startOffset,
-								endOffset
-							);
-							wrapper.textContent = word;
-
-							// Find the text node containing this word
-							const textNodes = [];
-							const walker = document.createTreeWalker(
-								range.commonAncestorContainer,
-								NodeFilter.SHOW_TEXT,
-								null,
-								false
-							);
-
-							let node;
-							while ( ( node = walker.nextNode() ) ) {
-								if ( node.textContent.includes( word ) ) {
-									textNodes.push( node );
-								}
-							}
-
-							// Highlight the first occurrence of the word
-							if ( textNodes.length > 0 ) {
-								const textNode = textNodes[ 0 ];
-								const nodeText = textNode.textContent;
-								const wordIndex = nodeText.indexOf( word );
-
-								if ( wordIndex >= 0 ) {
-									const nodeRange = document.createRange();
-									nodeRange.setStart( textNode, wordIndex );
-									nodeRange.setEnd(
-										textNode,
-										wordIndex + word.length
-									);
-									nodeRange.surroundContents( wrapper );
-								}
-							}
+							selectionRange.surroundContents( selectionWrapper );
 						}
 					} else {
 						// Original highlighting logic for main content
-						const blockWrapper = document.querySelector(
-							'[data-wp-interactive="mosne-text-to-speech-block"]'
-						);
 
 						// Get excluded classes from data attribute or use default
 						const excludeClassesStr =
@@ -233,15 +201,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 							const nodeLength = node.length;
 							if ( charCount + nodeLength > event.charIndex ) {
 								// Found the node containing the current position
-								const blockWrapper = document.querySelector(
-									'[data-wp-interactive="mosne-text-to-speech-block"]'
-								);
-								const highlightBackground =
-									blockWrapper?.dataset.highlightBackground ||
-									'#ffeb3b';
-								const highlightColor =
-									blockWrapper?.dataset.highlightColor ||
-									'#000000';
 
 								// Create wrapper span
 								const wrapper =
@@ -319,49 +278,29 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			}
 			state.utterance = newUtterance;
 		},
-		updateUtterance() {
+		async updateUtterance() {
 			const utterance = state.utterance;
 			if ( utterance ) {
 				window.speechSynthesis.cancel();
-
-				// Remove any existing highlights
-				const mainElement = document.querySelector( 'main' );
-				if ( mainElement ) {
-					const highlighted = mainElement.querySelectorAll(
-						'.mosne-tts-highlighted-word'
-					);
-					highlighted.forEach( ( el ) => {
-						const parent = el.parentNode;
-						parent.replaceChild(
-							document.createTextNode( el.textContent ),
-							el
-						);
-					} );
-				}
-
-				// Update state directly without relying on context
+				actions.clearHighlights();
 				state.isPlaying = false;
 
-				// Check if synthesis is ready using a promise
-				const checkSynthesisReady = () => {
-					return new Promise( ( resolve ) => {
-						const check = () => {
-							if (
-								! window.speechSynthesis.speaking &&
-								! window.speechSynthesis.pending
-							) {
-								resolve();
-							} else {
-								setTimeout( check, 100 );
-							}
-						};
-						check();
-					} );
-				};
-
-				// Wait for synthesis to be ready before creating new utterance
-				checkSynthesisReady().then( () => {
-					actions.createUtterance();
+				await actions.checkSynthesisReady();
+				actions.createUtterance();
+			}
+		},
+		clearHighlights() {
+			const mainElement = document.querySelector( 'main' );
+			if ( mainElement ) {
+				const highlighted = mainElement.querySelectorAll(
+					'.mosne-tts-highlighted-word'
+				);
+				highlighted.forEach( ( el ) => {
+					const parent = el.parentNode;
+					parent.replaceChild(
+						document.createTextNode( el.textContent ),
+						el
+					);
 				} );
 			}
 		},
@@ -417,24 +356,10 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			state.isPlaying = false;
 			window.speechSynthesis.cancel();
 
-			// Reset chunks
 			state.currentChunk = 0;
 			state.textChunks = [];
 
-			// Remove any existing highlights
-			const mainElement = document.querySelector( 'main' );
-			if ( mainElement ) {
-				const highlighted = mainElement.querySelectorAll(
-					'.mosne-tts-highlighted-word'
-				);
-				highlighted.forEach( ( el ) => {
-					const parent = el.parentNode;
-					parent.replaceChild(
-						document.createTextNode( el.textContent ),
-						el
-					);
-				} );
-			}
+			actions.clearHighlights();
 		},
 		changeVoice( e ) {
 			const context = getContext();
@@ -460,87 +385,45 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				}, 50 );
 			}
 		},
-		changeSpeed( e ) {
+		async changeSpeed( e ) {
 			const context = getContext();
 			context.isPlaying = false;
-
-			// Cancel current speech
 			window.speechSynthesis.cancel();
 
-			// Update state
 			state.currentSpeed = e.target.value;
 			window.localStorage.setItem(
 				'mosne-tts-speed-' + document.documentElement.lang,
 				e.target.value
 			);
 
-			// Check if synthesis is ready using a promise
-			const checkSynthesisReady = () => {
-				return new Promise( ( resolve ) => {
-					const check = () => {
-						if (
-							! window.speechSynthesis.speaking &&
-							! window.speechSynthesis.pending
-						) {
-							resolve();
-						} else {
-							setTimeout( check, 100 );
-						}
-					};
-					check();
-				} );
-			};
+			await actions.checkSynthesisReady();
+			actions.createUtterance();
 
-			// Wait for synthesis to be ready before creating new utterance
-			checkSynthesisReady().then( () => {
-				actions.createUtterance();
-				if ( context.isPlaying ) {
-					setTimeout( () => {
-						window.speechSynthesis.speak( state.utterance );
-					}, 50 );
-				}
-			} );
+			if ( context.isPlaying ) {
+				setTimeout( () => {
+					window.speechSynthesis.speak( state.utterance );
+				}, 50 );
+			}
 		},
-		changePitch( e ) {
+		async changePitch( e ) {
 			const context = getContext();
 			context.isPlaying = false;
-
-			// Cancel current speech
 			window.speechSynthesis.cancel();
 
-			// Update state
 			state.currentPitch = e.target.value;
 			window.localStorage.setItem(
 				'mosne-tts-pitch-' + document.documentElement.lang,
 				e.target.value
 			);
 
-			// Check if synthesis is ready using a promise
-			const checkSynthesisReady = () => {
-				return new Promise( ( resolve ) => {
-					const check = () => {
-						if (
-							! window.speechSynthesis.speaking &&
-							! window.speechSynthesis.pending
-						) {
-							resolve();
-						} else {
-							setTimeout( check, 100 );
-						}
-					};
-					check();
-				} );
-			};
+			await actions.checkSynthesisReady();
+			actions.createUtterance();
 
-			// Wait for synthesis to be ready before creating new utterance
-			checkSynthesisReady().then( () => {
-				actions.createUtterance();
-				if ( context.isPlaying ) {
-					setTimeout( () => {
-						window.speechSynthesis.speak( state.utterance );
-					}, 50 );
-				}
-			} );
+			if ( context.isPlaying ) {
+				setTimeout( () => {
+					window.speechSynthesis.speak( state.utterance );
+				}, 50 );
+			}
 		},
 		toggleSettings() {
 			const context = getContext();
@@ -641,64 +524,3 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 	},
 } );
-
-class TextToSpeechManager {
-	constructor() {
-		this.utterance = null;
-		this.highlightedElement = null;
-		this.originalText = '';
-		this.synth = window.speechSynthesis;
-	}
-
-	speak( text, element ) {
-		// Cancel any ongoing speech
-		this.synth.cancel();
-
-		this.utterance = new SpeechSynthesisUtterance( text );
-		this.highlightedElement = element;
-		this.originalText = text;
-
-		this.utterance.onboundary = ( event ) => {
-			if ( event.name === 'word' ) {
-				// Remove previous highlighting
-				this.highlightedElement.innerHTML = this.originalText;
-
-				// Calculate the word position
-				const wordPosition = event.charIndex;
-				const wordLength = event.charLength || 1;
-
-				// Create highlighted version
-				const beforeText = this.originalText.substring(
-					0,
-					wordPosition
-				);
-				const highlightedWord = this.originalText.substring(
-					wordPosition,
-					wordPosition + wordLength
-				);
-				const afterText = this.originalText.substring(
-					wordPosition + wordLength
-				);
-
-				// Apply highlighting
-				this.highlightedElement.innerHTML = `${ beforeText }<span class="highlighted-word">${ highlightedWord }</span>${ afterText }`;
-			}
-		};
-
-		this.utterance.onend = () => {
-			// Reset highlighting when speech ends
-			if ( this.highlightedElement ) {
-				this.highlightedElement.innerHTML = this.originalText;
-			}
-		};
-
-		this.synth.speak( this.utterance );
-	}
-
-	stop() {
-		this.synth.cancel();
-		if ( this.highlightedElement ) {
-			this.highlightedElement.innerHTML = this.originalText;
-		}
-	}
-}
