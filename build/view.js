@@ -189,13 +189,23 @@ const {
             }
           } else {
             // Original highlighting logic for main content
-            const excludeClass = blockWrapper?.dataset.excludeClass || 'skip-speech';
+            const blockWrapper = document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
+
+            // Get excluded classes from data attribute or use default
+            const excludeClassesStr = blockWrapper?.dataset.excludeClass || 'skip-speech';
+            // Split by spaces to get array of class names to exclude
+            const excludeClasses = excludeClassesStr.split(/\s+/);
             const walker = document.createTreeWalker(mainElement, NodeFilter.SHOW_TEXT, {
               acceptNode(node) {
                 let current = node.parentElement;
                 while (current) {
-                  if (current.classList && current.classList.contains('skip-speech')) {
-                    return NodeFilter.FILTER_REJECT;
+                  if (current.classList) {
+                    // Check if element has any of the excluded classes
+                    for (const excludeClass of excludeClasses) {
+                      if (excludeClass && current.classList.contains(excludeClass)) {
+                        return NodeFilter.FILTER_REJECT;
+                      }
+                    }
                   }
                   current = current.parentElement;
                 }
@@ -465,8 +475,9 @@ const {
     },
     getContent() {
       // Check if there is highlighted text
-      const selection = window.getSelection();
       const mainElement = document.querySelector('main');
+      const docView = mainElement?.ownerDocument.defaultView;
+      const selection = docView ? docView.getSelection() : null;
       let content = '';
       if (selection && selection.toString().trim().length > 0) {
         // Get selected text
@@ -479,9 +490,19 @@ const {
         // Get content from main element
         let cloneMain = mainElement?.cloneNode(true);
         if (cloneMain) {
-          const skip = cloneMain.querySelectorAll('.skip-speech');
-          skip.forEach(el => {
-            el.remove();
+          // Use the same exclude classes logic for consistency
+          const blockWrapper = document.querySelector('[data-wp-interactive="mosne-text-to-speech-block"]');
+          const excludeClassesStr = blockWrapper?.dataset.excludeClass || 'skip-speech';
+          const excludeClasses = excludeClassesStr.split(/\s+/);
+
+          // Remove all elements with excluded classes
+          excludeClasses.forEach(excludeClass => {
+            if (excludeClass) {
+              const skip = cloneMain.querySelectorAll(`.${excludeClass}`);
+              skip.forEach(el => {
+                el.remove();
+              });
+            }
           });
           content = cloneMain.textContent;
           cloneMain = null;
