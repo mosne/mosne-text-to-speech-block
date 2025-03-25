@@ -60,25 +60,6 @@ const getBrowser = () => {
 	return 'other';
 };
 
-const isLeafNode = ( node ) => {
-	// Check if this is a text node
-	if ( node.nodeType === Node.TEXT_NODE ) {
-		return true;
-	}
-
-	// For element nodes, check if they only contain text nodes (no other elements)
-	if ( node.nodeType === Node.ELEMENT_NODE ) {
-		for ( const child of node.childNodes ) {
-			if ( child.nodeType !== Node.TEXT_NODE ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	return false;
-};
-
 const { state, actions } = store( 'mosne-text-to-speech-block', {
 	state: {
 		isPlaying: false,
@@ -578,14 +559,12 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 					window.speechSynthesis.cancel();
 				}
-			} else {
-				// Standard pause for Chrome and other browsers
-				if (
-					window.speechSynthesis.speaking &&
-					! window.speechSynthesis.paused
-				) {
-					window.speechSynthesis.pause();
-				}
+			} else if (
+				window.speechSynthesis.speaking &&
+				! window.speechSynthesis.paused
+			) {
+				// Standard pause for Chrome and other browsers - fixed lonely if
+				window.speechSynthesis.pause();
 			}
 		},
 
@@ -959,7 +938,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			// Detect browser type
 			state.browserType = getBrowser();
-			console.log( `Browser detected: ${ state.browserType }` );
 
 			// Initialize highlight colors once at startup
 			initHighlightColors();
@@ -1007,255 +985,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 	},
 } );
-
-const updateHighlight = ( targetNode, background, color ) => {
-	requestAnimationFrame( () => {} );
-};
-
-const calculateNodePositions = () => {
-	const walker = document.createTreeWalker(
-		getMainElement(),
-		NodeFilter.SHOW_TEXT,
-		{
-			acceptNode( node ) {
-				return isLeafNode( node )
-					? NodeFilter.FILTER_ACCEPT
-					: NodeFilter.FILTER_REJECT;
-			},
-		}
-	);
-
-	let charCount = 0;
-	let node;
-	state.nodePositions.clear();
-
-	while ( ( node = walker.nextNode() ) ) {
-		state.nodePositions.set( charCount, {
-			node,
-			length: node.textContent.length,
-		} );
-		charCount += node.textContent.length;
-	}
-};
-
-const selectCurrentWord = ( event ) => {
-	if ( ! event || ! event.target ) {
-		return;
-	}
-
-	// Get the node reference properly
-	const node = event.target;
-	const doc = node.ownerDocument;
-	const docView = doc.defaultView;
-
-	if ( ! docView ) {
-		return;
-	}
-
-	// Get clicked text node
-	let textNode = null;
-	let textContent = '';
-
-	if ( node.nodeType === Node.TEXT_NODE ) {
-		textNode = node;
-		textContent = node.textContent;
-	} else if (
-		node.firstChild &&
-		node.firstChild.nodeType === Node.TEXT_NODE
-	) {
-		textNode = node.firstChild;
-		textContent = textNode.textContent;
-	} else {
-		// Not a text node or element containing text
-		return;
-	}
-
-	try {
-		// Get selection from document view
-		const selection = docView.getSelection();
-		if ( ! selection ) {
-			return;
-		}
-
-		// Calculate word boundaries
-		const range = doc.createRange();
-		const clickPos =
-			( event.offsetX / node.offsetWidth ) * textContent.length;
-
-		// Find word boundaries (nearest spaces)
-		let startPos = textContent.lastIndexOf( ' ', clickPos );
-		startPos = startPos === -1 ? 0 : startPos + 1;
-
-		let endPos = textContent.indexOf( ' ', clickPos );
-		endPos = endPos === -1 ? textContent.length : endPos;
-
-		// Set the range to select just the word
-		range.setStart( textNode, startPos );
-		range.setEnd( textNode, endPos );
-
-		// Apply the selection
-		selection.removeAllRanges();
-		selection.addRange( range );
-	} catch ( e ) {
-		console.warn( 'Error selecting word:', e );
-	}
-};
-
-// Helper function to get caret position - optimized to use document view
-const getCaretPosition = ( element ) => {
-	if ( ! element ) {
-		return 0;
-	}
-
-	try {
-		const doc = element.ownerDocument;
-		const docView = doc.defaultView;
-		const selection = docView.getSelection();
-
-		if ( ! selection || ! selection.rangeCount ) {
-			return 0;
-		}
-
-		const range = selection.getRangeAt( 0 );
-		const preCaretRange = range.cloneRange();
-		preCaretRange.selectNodeContents( element );
-		preCaretRange.setEnd( range.endContainer, range.endOffset );
-		return preCaretRange.toString().length;
-	} catch ( e ) {
-		console.warn( 'Error getting caret position:', e );
-		return 0;
-	}
-};
-
-// Export necessary functions for direct use
-export const textToSpeechHelpers = {
-	// Implement the word selection function for external use
-	selectCurrentWord: ( event ) => {
-		if ( ! event || ! event.target ) {
-			return;
-		}
-
-		// Get the node reference properly
-		const node = event.target;
-		const doc = node.ownerDocument;
-		const docView = doc.defaultView;
-
-		if ( ! docView ) {
-			return;
-		}
-
-		// Get clicked text node
-		let textNode = null;
-		let textContent = '';
-
-		if ( node.nodeType === Node.TEXT_NODE ) {
-			textNode = node;
-			textContent = node.textContent;
-		} else if (
-			node.firstChild &&
-			node.firstChild.nodeType === Node.TEXT_NODE
-		) {
-			textNode = node.firstChild;
-			textContent = textNode.textContent;
-		} else {
-			// Not a text node or element containing text
-			return;
-		}
-
-		try {
-			// Get selection from document view
-			const selection = docView.getSelection();
-			if ( ! selection ) {
-				return;
-			}
-
-			// Calculate word boundaries
-			const range = doc.createRange();
-			const clickPos =
-				( event.offsetX / node.offsetWidth ) * textContent.length;
-
-			// Find word boundaries (nearest spaces)
-			let startPos = textContent.lastIndexOf( ' ', clickPos );
-			startPos = startPos === -1 ? 0 : startPos + 1;
-
-			let endPos = textContent.indexOf( ' ', clickPos );
-			endPos = endPos === -1 ? textContent.length : endPos;
-
-			// Set the range to select just the word
-			range.setStart( textNode, startPos );
-			range.setEnd( textNode, endPos );
-
-			// Apply the selection
-			selection.removeAllRanges();
-			selection.addRange( range );
-		} catch ( e ) {
-			console.warn( 'Error selecting word:', e );
-		}
-	},
-
-	// Export get caret position for external use
-	getCaretPosition: ( element ) => {
-		if ( ! element ) {
-			return 0;
-		}
-
-		try {
-			const doc = element.ownerDocument;
-			const docView = doc.defaultView;
-			const selection = docView.getSelection();
-
-			if ( ! selection || ! selection.rangeCount ) {
-				return 0;
-			}
-
-			const range = selection.getRangeAt( 0 );
-			const preCaretRange = range.cloneRange();
-			preCaretRange.selectNodeContents( element );
-			preCaretRange.setEnd( range.endContainer, range.endOffset );
-			return preCaretRange.toString().length;
-		} catch ( e ) {
-			console.warn( 'Error getting caret position:', e );
-			return 0;
-		}
-	},
-
-	// Export node position calculator for external use
-	calculateNodePositions: () => {
-		const mainElement = getMainElement();
-		if ( ! mainElement ) {
-			return;
-		}
-
-		try {
-			const walker = document.createTreeWalker(
-				mainElement,
-				NodeFilter.SHOW_TEXT,
-				{
-					acceptNode( node ) {
-						// Check if node has text content
-						return node.textContent.trim().length > 0
-							? NodeFilter.FILTER_ACCEPT
-							: NodeFilter.FILTER_REJECT;
-					},
-				}
-			);
-
-			let charCount = 0;
-			let node;
-			state.nodePositions.clear();
-
-			while ( ( node = walker.nextNode() ) ) {
-				state.nodePositions.set( charCount, {
-					node,
-					length: node.textContent.length,
-				} );
-				charCount += node.textContent.length;
-			}
-		} catch ( e ) {
-			console.warn( 'Error calculating node positions:', e );
-		}
-	},
-};
 
 // Add this function after the helper functions at the top
 const initHighlightColors = () => {

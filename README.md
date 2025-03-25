@@ -53,6 +53,12 @@ The icons onf this blocks come from Heroicons with MIT licenses
 
 ## Changelog
 
+### 0.3.0 - 2025-03-25
+
+* Added a new custom skip classes field 
+* Fix compatibility issues with Firefox and Android.
+* Improved performance
+
 ### 0.2.0 - 2025-02-23
 
 * Highlight the current sentence being spoken with custom colors.
