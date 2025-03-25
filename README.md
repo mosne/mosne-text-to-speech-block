@@ -1,6 +1,6 @@
 # Mosne Text to Speech block
 
-![ Mosne Text to Speech ](https://github.com/mosne//mosne-text-to-speech-block/blob/main/.wordpress-org/banner-1544x500.png)
+![ Mosne Text to Speech ](https://github.com/mosne/mosne-text-to-speech-block/blob/main/.wordpress-org/banner-1544x500.png)
 
 ## Description
 
@@ -44,7 +44,7 @@ You can skip some content adding the class ```.skip-speech``` to the element.
 ## Screenshots
 
 1. Example of the plugin in action
-   ![screenshot-1](https://github.com/mosne/mosne-dark-palette/blob/main/.wordpress-org/screenshot-1.gif)
+   ![screenshot-1](https://github.com/mosne/mosne-text-to-speech-block/blob/main/.wordpress-org/screenshot-1.gif)
 
 ## Credits
 
@@ -52,6 +52,12 @@ The icons onf this blocks come from Heroicons with MIT licenses
 [heroicons.com](https://heroicons.com/)
 
 ## Changelog
+
+### 0.3.0 - 2025-03-25
+
+* Added a new custom skip classes field 
+* Fix compatibility issues with Firefox and Android.
+* Improved performance
 
 ### 0.2.0 - 2025-02-23
 

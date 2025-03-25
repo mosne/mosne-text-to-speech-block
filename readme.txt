@@ -4,23 +4,23 @@ Tags:              block, speech, accessibility, audio, tts
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        0.2.0
+Stable tag:        0.3.0
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
-Read the content of of a page using native Speech Synthesis and  Interactivity API.
+Read the content of a page using native Speech Synthesis and Interactivity API.
 
 == Description ==
-This is a block that allow you to add a text to speech feature to your website.
-using the Web Speech API, the plugin will read the content of the page according to the document language and user's preferences.
-No third-party services are used, so no cookies are required. RGPD-friendly. Accessibility-ready.
+This is a block that allows you to add a text-to-speech feature to your website.
+Using the Web Speech API, the plugin will read the content of the page according to the document language and user's preferences.
+No third-party services are used, so no cookies are required. GDPR-friendly. Accessibility-ready.
 
 
 == Key Features ==
 
 * Listen to the content of a page according to the document language and user's preferences.
 * (New) Highlight the current sentence being spoken with custom colors.
-* Skip undesired content adding the class .skip-speech to the element.
+* Skip undesired content by adding the class .skip-speech to the element.
 * Accessibility-ready
 * No cookies used (GDPR-friendly)
 * Performance-optimized and lightweight
@@ -44,13 +44,19 @@ No third-party services are used, so no cookies are required. RGPD-friendly. Acc
 == Frequently Asked Questions ==
 
 =  Can I skip some content? =
-You can skip some content adding the class `.skip-speech` to the element.
+You can skip some content by adding the class `.skip-speech` to the element.
 
 == Screenshots ==
 
 1. Example of the plugin in action
 
 == Changelog ==
+
+= 0.2.0 - 2025-03-25 =
+
+* Added a new custom skip classes field 
+* Fix compatibility issues with Firefox and Android.
+* Improved performance
 
 = 0.1.1 - 2025-02-05 =
 
@@ -61,5 +67,5 @@ You can skip some content adding the class `.skip-speech` to the element.
 * Initial release
 
 === Credits ===
-The icons onf this blocks come from Heroicons with MIT licenses
+The icons of this block come from Heroicons with MIT license
 [heroicons.com](https://heroicons.com/)
