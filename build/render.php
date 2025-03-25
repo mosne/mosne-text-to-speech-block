@@ -18,6 +18,19 @@ $block_title               = $attributes['label'] ?? '';
 $class_options             = $attributes['classOptions'] ?? '';
 $exclude_class             = $attributes['excludeClass'] ?? '';
 $sanitized_exclude_classes = 'skip-speech ' . sanitize_html_class( $exclude_class );
+
+// Add inline style for ::selection using the highlight background and color
+$inline_style = '
+	.main::selection {
+		background-color: ' . esc_attr( $attributes['highlightBackground'] ) . ';
+		color: ' . esc_attr( $attributes['highlightColor'] ) . ';
+	}
+';
+
+\wp_add_inline_style(
+	'mosne-text-to-speech-block-selection-style',
+	$inline_style
+);
 ?>
 <div
 	<?php echo wp_kses_data( get_block_wrapper_attributes( array( 'class' => 'skip-speech ' . $class_options ) ) ); ?>

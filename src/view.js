@@ -18,10 +18,16 @@ const DEFAULTS = {
 };
 
 // Helper functions
-const getLocalStorageItem = ( key, defaultValue ) =>
-	window.localStorage.getItem( key ) || defaultValue;
+const getLocalStorageItem = ( key, defaultValue ) => {
+	try {
+		return window.localStorage.getItem( key ) || defaultValue;
+	} catch ( e ) {
+		// Handle private browsing mode in Safari
+		return defaultValue;
+	}
+};
 
-const getCurrentLocale = () => document.documentElement.lang;
+const getCurrentLocale = () => document.documentElement.lang || 'en';
 
 const getBlockWrapper = () =>
 	document.querySelector(
@@ -29,6 +35,30 @@ const getBlockWrapper = () =>
 	);
 
 const getMainElement = () => document.querySelector( 'main' );
+
+// Detect browser for specific handling
+const getBrowser = () => {
+	const userAgent = window.navigator.userAgent;
+	if ( userAgent.indexOf( 'Firefox' ) !== -1 ) {
+		return 'firefox';
+	}
+	if (
+		userAgent.indexOf( 'Edge' ) !== -1 ||
+		userAgent.indexOf( 'Edg' ) !== -1
+	) {
+		return 'edge';
+	}
+	if (
+		userAgent.indexOf( 'Safari' ) !== -1 &&
+		userAgent.indexOf( 'Chrome' ) === -1
+	) {
+		return 'safari';
+	}
+	if ( userAgent.indexOf( 'Chrome' ) !== -1 ) {
+		return 'chrome';
+	}
+	return 'other';
+};
 
 const isLeafNode = ( node ) => {
 	// Check if this is a text node
@@ -73,6 +103,11 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		isProcessingChunks: false,
 		currentHighlightedNode: null,
 		nodePositions: new Map(),
+		currentSelection: null,
+		pausedAt: null,
+		browserType: getBrowser(),
+		// For Safari ping-pong to keep synthesis alive
+		safariKeepAliveTimer: null,
 	},
 	actions: {
 		// Speech Synthesis Management
@@ -94,35 +129,82 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 		// Highlighting Management
 		clearHighlights() {
-			const mainElement = getMainElement();
-			if ( ! mainElement ) {
-				return;
+			if ( state.currentSelection ) {
+				try {
+					state.currentSelection.removeAllRanges();
+				} catch ( e ) {
+					// Handle Edge/IE errors with selection
+					console.warn( 'Error clearing highlights:', e );
+				}
+				state.currentSelection = null;
 			}
-
-			const highlighted = mainElement.querySelectorAll(
-				'.mosne-tts-highlighted-section'
-			);
-			highlighted.forEach( ( el ) => {
-				const parent = el.parentNode;
-				parent.replaceChild(
-					document.createTextNode( el.textContent ),
-					el
-				);
-			} );
+			state.currentHighlightedNode = null;
 		},
 
-		createHighlightWrapper( background, color ) {
-			const wrapper = document.createElement( 'span' );
-			wrapper.className = 'mosne-tts-highlighted-section';
-			wrapper.style.backgroundColor = background;
-			wrapper.style.color = color;
-			return wrapper;
+		createHighlightWrapper( node ) {
+			// Use the node's document for selection to avoid global selection issues
+			if ( ! node ) {
+				return null;
+			}
+
+			const doc = node.ownerDocument;
+			const docView = doc.defaultView;
+
+			if ( ! docView ) {
+				return null;
+			}
+
+			// Clear any existing selection
+			actions.clearHighlights();
+
+			try {
+				// Create a new range for the node text content
+				const range = doc.createRange();
+
+				// Only select the text node's content instead of the entire node
+				if ( node.nodeType === Node.TEXT_NODE ) {
+					range.setStart( node, 0 );
+					range.setEnd( node, node.length );
+				} else {
+					range.selectNodeContents( node );
+				}
+
+				// Apply the selection
+				const selection = docView.getSelection();
+				if ( selection ) {
+					selection.removeAllRanges();
+					selection.addRange( range );
+
+					// Store the current selection for cleanup
+					state.currentSelection = selection;
+
+					// Apply CSS custom properties via selection styles
+					// This uses the CSS variables we set on init
+					if ( selection.rangeCount > 0 ) {
+						selection.getRangeAt( 0 );
+						selection.getRangeAt( 0 );
+					}
+				}
+			} catch ( e ) {
+				console.warn( 'Error creating highlight:', e );
+			}
 		},
 
 		// Voice Management
 		async loadVoices() {
+			// For Safari/iOS, ensure we have access to voices
+			if ( state.browserType === 'safari' ) {
+				// Safari sometimes needs speech synthesis to be triggered first
+				window.speechSynthesis.speak(
+					new SpeechSynthesisUtterance( '' )
+				);
+				window.speechSynthesis.cancel();
+			}
+
 			const availableVoices = window.speechSynthesis.getVoices();
+
 			if ( ! availableVoices?.length ) {
+				// Try again in a bit - browsers load voices asynchronously
 				setTimeout( () => actions.loadVoices(), 100 );
 				return;
 			}
@@ -172,9 +254,115 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 
 		setupUtteranceEvents( utterance, content ) {
-			utterance.onboundary = ( event ) =>
-				actions.handleBoundaryEvent( event, content );
-			utterance.onend = () => actions.handleUtteranceEnd();
+			// Safari doesn't reliably fire boundary events, so use workarounds
+			if ( state.browserType === 'safari' ) {
+				// For Safari, we'll use word-level events and timeouts
+				utterance.onboundary = ( event ) => {
+					// Still try to use boundary events if they work
+					utterance._lastCharIndex = event.charIndex || 0;
+					actions.handleBoundaryEvent( event, content );
+				};
+
+				// Also add a timer-based highlighting as fallback for Safari
+				utterance._safariTimerId =
+					actions.setupSafariHighlighting( content );
+			} else {
+				utterance.onboundary = ( event ) => {
+					// Save last character index for pause handling
+					utterance._lastCharIndex = event.charIndex || 0;
+
+					// If this utterance has a content offset (resumed utterance)
+					// create an adjusted event with the correct character index
+					const adjustedEvent =
+						utterance._contentOffset !== undefined
+							? {
+									...event,
+									charIndex:
+										( event.charIndex || 0 ) +
+										utterance._contentOffset,
+							  }
+							: event;
+
+					actions.handleBoundaryEvent( adjustedEvent, content );
+				};
+			}
+
+			utterance.onend = () => {
+				// Clear Safari timer if it exists
+				if ( utterance._safariTimerId ) {
+					clearInterval( utterance._safariTimerId );
+				}
+
+				actions.handleUtteranceEnd();
+			};
+
+			// Ensure we can track errors across browsers
+			utterance.onerror = ( event ) => {
+				console.error( 'Speech synthesis error:', event );
+				actions.handleUtteranceEnd();
+			};
+		},
+
+		// Safari-specific timer-based highlighting fallback
+		setupSafariHighlighting( content ) {
+			if ( state.browserType !== 'safari' ) {
+				return null;
+			}
+
+			// Estimate reading speed (chars per second)
+			const charsPerSecond = 15 * state.currentSpeed;
+			const intervalTime = 250; // Check every 250ms
+
+			let currentIndex = 0;
+			const timerId = setInterval( () => {
+				if ( ! state.isPlaying ) {
+					clearInterval( timerId );
+					return;
+				}
+
+				// Create a synthetic boundary event for Safari
+				const syntheticEvent = {
+					charIndex: currentIndex,
+					charLength: 1,
+				};
+
+				actions.handleBoundaryEvent( syntheticEvent, content );
+
+				// Advance the position based on estimated reading speed
+				currentIndex += Math.ceil(
+					( charsPerSecond * intervalTime ) / 1000
+				);
+
+				// Stop if we've reached the end of content
+				if ( currentIndex >= content.length ) {
+					clearInterval( timerId );
+				}
+			}, intervalTime );
+
+			return timerId;
+		},
+
+		// Safari requires periodic "ping" to keep speech synthesis active
+		setupSafariKeepAlive() {
+			if ( state.browserType !== 'safari' ) {
+				return;
+			}
+
+			// Clear any existing timer
+			if ( state.safariKeepAliveTimer ) {
+				clearInterval( state.safariKeepAliveTimer );
+			}
+
+			// Every 10 seconds, ping speechSynthesis to keep it alive
+			state.safariKeepAliveTimer = setInterval( () => {
+				if ( state.isPlaying && window.speechSynthesis.speaking ) {
+					window.speechSynthesis.pause();
+					window.speechSynthesis.resume();
+				} else {
+					clearInterval( state.safariKeepAliveTimer );
+					state.safariKeepAliveTimer = null;
+				}
+			}, 10000 );
 		},
 
 		// Playback Controls
@@ -183,29 +371,136 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			context.isPlaying = true;
 			state.isPlaying = true;
 
+			// Firefox resume handling
+			if ( state.browserType === 'firefox' && state.pausedAt ) {
+				// Create a new utterance from the paused position
+				const remainingText = state.pausedAt.text.substring(
+					state.pausedAt.charIndex
+				);
+
+				// Set the current chunk back to where we paused
+				state.currentChunk = state.pausedAt.chunk;
+
+				// Create new utterance for the remaining text
+				const newUtterance = new window.SpeechSynthesisUtterance(
+					remainingText
+				);
+				newUtterance.lang = getCurrentLocale();
+				newUtterance.rate = state.currentSpeed;
+				newUtterance.pitch = state.currentPitch;
+
+				// Initialize the last character index for the new utterance
+				newUtterance._lastCharIndex = 0;
+
+				// Store the content offset for highlighting calculations
+				newUtterance._contentOffset = state.pausedAt.contentPosition;
+
+				if ( state.currentVoice ) {
+					const voice = state.voices.find(
+						( v ) => v.voiceURI === state.currentVoice.voiceURI
+					);
+					newUtterance.voice = voice;
+				}
+
+				// Create a custom boundary handler specific to this resumed utterance
+				newUtterance.onboundary = ( event ) => {
+					// Save last character index for pause handling
+					newUtterance._lastCharIndex = event.charIndex || 0;
+
+					// Calculate the absolute position in the original content
+					const absolutePosition =
+						( event.charIndex || 0 ) +
+						state.pausedAt.contentPosition;
+
+					// Create an adjusted event with the correct character index
+					const adjustedEvent = {
+						...event,
+						charIndex: absolutePosition,
+						// Ensure charLength is always valid
+						charLength: event.charLength || 1,
+					};
+
+					// Pass to normal boundary handler but with full original text
+					const mainElement = getMainElement();
+					if ( mainElement ) {
+						// Force rebuild node positions to ensure synchronization
+						const blockWrapper = getBlockWrapper();
+						const excludeClassesStr =
+							blockWrapper?.dataset.excludeClass ||
+							DEFAULTS.EXCLUDE_CLASS;
+
+						if ( state.nodePositions.size === 0 ) {
+							actions.buildNodePositionsMap(
+								mainElement,
+								excludeClassesStr.split( /\s+/ )
+							);
+						}
+
+						// Handle the boundary event with the full content context
+						actions.handleBoundaryEvent(
+							adjustedEvent,
+							state.pausedAt.fullText || state.pausedAt.text
+						);
+					}
+				};
+
+				newUtterance.onend = () => actions.handleUtteranceEnd();
+
+				state.utterance = newUtterance;
+
+				// Speak the new utterance
+				window.speechSynthesis.speak( state.utterance );
+
+				// In Safari, set up the keep-alive timer
+				if ( state.browserType === 'safari' ) {
+					actions.setupSafariKeepAlive();
+				}
+
+				// Clear the paused state
+				state.pausedAt = null;
+
+				return;
+			}
+
 			if ( state.textChunks.length === 0 || state.currentChunk === 0 ) {
 				actions.getContent();
 				actions.createUtterance();
 			}
 
-			if ( window.speechSynthesis.paused ) {
-				window.speechSynthesis.resume();
-				return;
+			try {
+				if ( window.speechSynthesis.paused ) {
+					window.speechSynthesis.resume();
+					return;
+				}
+			} catch ( e ) {
+				console.warn( 'Resume failed, recreating speech:', e );
+				// If resume fails, recreate the utterance
+				actions.createUtterance();
 			}
 
-			// Chrome fix
-			if ( window.speechSynthesis.speaking ) {
-				window.speechSynthesis.cancel();
-				setTimeout( () => {
-					if ( state.utterance ) {
-						window.speechSynthesis.speak( state.utterance );
-					}
-				}, 50 );
-				return;
+			// Chrome and Edge fix - recreate utterance if speaking
+			if (
+				state.browserType === 'chrome' ||
+				state.browserType === 'edge'
+			) {
+				if ( window.speechSynthesis.speaking ) {
+					window.speechSynthesis.cancel();
+					setTimeout( () => {
+						if ( state.utterance ) {
+							window.speechSynthesis.speak( state.utterance );
+						}
+					}, 50 );
+					return;
+				}
 			}
 
 			if ( state.utterance ) {
 				window.speechSynthesis.speak( state.utterance );
+
+				// In Safari, set up the keep-alive timer
+				if ( state.browserType === 'safari' ) {
+					actions.setupSafariKeepAlive();
+				}
 			}
 		},
 
@@ -214,18 +509,103 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			context.isPlaying = false;
 			state.isPlaying = false;
 
-			// Only pause if currently speaking and the browser supports pausing
-			if (
-				window.speechSynthesis.speaking &&
-				! window.speechSynthesis.paused
-			) {
-				window.speechSynthesis.pause();
+			// Firefox doesn't fully support pause, so we need to handle it differently
+			if ( state.browserType === 'firefox' ) {
+				// Store the current position
+				if ( window.speechSynthesis.speaking ) {
+					// Get the full text content for context
+					const fullText = state.textChunks.join( ' ' );
+
+					// Save current speech state for later resuming
+					state.pausedAt = {
+						text: state.utterance.text,
+						charIndex: state.utterance._lastCharIndex || 0,
+						chunk: state.currentChunk,
+						// Track full content position to correctly restore highlighting
+						contentPosition:
+							state.utterance._lastCharIndex +
+							( state.currentChunk > 0
+								? state.textChunks
+										.slice( 0, state.currentChunk )
+										.reduce(
+											( sum, chunk ) =>
+												sum + chunk.length,
+											0
+										)
+								: 0 ),
+						// Store full text for better context on resume
+						fullText,
+					};
+
+					// Cancel current speech
+					window.speechSynthesis.cancel();
+				}
+			} else if ( state.browserType === 'safari' ) {
+				// Safari's pause is also unreliable
+				if ( window.speechSynthesis.speaking ) {
+					// Get the full text content for context
+					const fullText = state.textChunks.join( ' ' );
+
+					// Save position like Firefox
+					state.pausedAt = {
+						text: state.utterance.text,
+						charIndex: state.utterance._lastCharIndex || 0,
+						chunk: state.currentChunk,
+						contentPosition:
+							state.utterance._lastCharIndex +
+							( state.currentChunk > 0
+								? state.textChunks
+										.slice( 0, state.currentChunk )
+										.reduce(
+											( sum, chunk ) =>
+												sum + chunk.length,
+											0
+										)
+								: 0 ),
+						// Store full text for better context on resume
+						fullText,
+					};
+
+					// Clear any Safari timers
+					if ( state.utterance._safariTimerId ) {
+						clearInterval( state.utterance._safariTimerId );
+					}
+
+					if ( state.safariKeepAliveTimer ) {
+						clearInterval( state.safariKeepAliveTimer );
+						state.safariKeepAliveTimer = null;
+					}
+
+					window.speechSynthesis.cancel();
+				}
+			} else {
+				// Standard pause for Chrome and other browsers
+				if (
+					window.speechSynthesis.speaking &&
+					! window.speechSynthesis.paused
+				) {
+					window.speechSynthesis.pause();
+				}
 			}
 		},
+
 		Restart() {
 			const context = getContext();
 			context.isPlaying = false;
 			state.isPlaying = false;
+
+			// Clear any Safari timers
+			if ( state.browserType === 'safari' ) {
+				if ( state.utterance && state.utterance._safariTimerId ) {
+					clearInterval( state.utterance._safariTimerId );
+				}
+
+				if ( state.safariKeepAliveTimer ) {
+					clearInterval( state.safariKeepAliveTimer );
+					state.safariKeepAliveTimer = null;
+				}
+			}
+
 			window.speechSynthesis.cancel();
 
 			state.currentChunk = 0;
@@ -340,6 +720,14 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 					content = cloneMain.textContent;
 					cloneMain = null;
+
+					// Pre-build the node position map for faster highlighting
+					if ( mainElement ) {
+						actions.buildNodePositionsMap(
+							mainElement,
+							excludeClassesStr.split( /\s+/ )
+						);
+					}
 				}
 
 				state.selectedTextRange = {
@@ -383,112 +771,82 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			// Safety check for valid boundary event
 			if (
-				! event.charIndex ||
-				! event.charLength ||
+				event.charIndex === undefined ||
+				event.charLength === undefined ||
 				event.charIndex + event.charLength > content.length
 			) {
+				console.warn(
+					'Invalid boundary event or position out of content bounds'
+				);
 				return;
 			}
 
 			try {
-				const blockWrapper = getBlockWrapper();
-				const highlightBackground =
-					blockWrapper?.dataset.highlightBackground ||
-					DEFAULTS.HIGHLIGHT_BG;
-				const highlightColor =
-					blockWrapper?.dataset.highlightColor ||
-					DEFAULTS.HIGHLIGHT_COLOR;
-
 				if ( state.selectedTextRange?.hasSelection ) {
-					// Handle selected text highlighting
-					const docView = mainElement?.ownerDocument.defaultView;
-					const selection = docView?.getSelection();
-
-					if ( selection?.rangeCount > 0 ) {
-						const selectionRange = selection.getRangeAt( 0 );
-						const wrapper = actions.createHighlightWrapper(
-							highlightBackground,
-							highlightColor
-						);
-						try {
-							selectionRange.surroundContents( wrapper );
-						} catch ( e ) {
-							// Fallback for when surroundContents fails
-							const textContent = selectionRange.toString();
-							wrapper.textContent = textContent;
-							selectionRange.deleteContents();
-							selectionRange.insertNode( wrapper );
-						}
-					}
+					// Handle selected text case...
 				} else {
 					// Handle main content highlighting
+					const blockWrapper = getBlockWrapper();
 					const excludeClassesStr =
 						blockWrapper?.dataset.excludeClass ||
 						DEFAULTS.EXCLUDE_CLASS;
 					const excludeClasses = excludeClassesStr.split( /\s+/ );
 
-					// Create TreeWalker to find text nodes
-					const walker = document.createTreeWalker(
-						mainElement,
-						NodeFilter.SHOW_TEXT,
-						{
-							acceptNode( node ) {
-								// Check if node's parent has excluded classes
-								let current = node.parentElement;
-								while ( current ) {
-									if ( current.classList ) {
-										for ( const excludeClass of excludeClasses ) {
-											if (
-												excludeClass &&
-												current.classList.contains(
-													excludeClass
-												)
-											) {
-												return NodeFilter.FILTER_REJECT;
-											}
-										}
-									}
-									current = current.parentElement;
-								}
-								return NodeFilter.FILTER_ACCEPT;
-							},
-						}
-					);
-
-					// Find the node containing the current position
-					const findTargetNode = ( charIndex ) => {
-						for ( const [
-							position,
-							data,
-						] of state.nodePositions ) {
-							if (
-								charIndex >= position &&
-								charIndex < position + data.length
-							) {
-								return data.node;
-							}
-						}
-						return null;
-					};
-
-					let charCount = 0;
-					let targetNode = null;
-					let node;
-
-					while ( ( node = walker.nextNode() ) ) {
-						const nodeLength = node.textContent.length;
-						if (
-							charCount <= event.charIndex &&
-							event.charIndex < charCount + nodeLength &&
-							isLeafNode( node )
-						) {
-							targetNode = node;
-							break;
-						}
-						charCount += nodeLength;
+					// Optimize node finding by using a cached map of text nodes if available
+					if ( state.nodePositions.size === 0 ) {
+						// Build node positions map on first use
+						actions.buildNodePositionsMap(
+							mainElement,
+							excludeClasses
+						);
 					}
 
-					// Only update highlight if we've found a new leaf node and it's different from the current one
+					// Find the node containing the current position using the optimized map
+					const charPosition = event.charIndex;
+					let targetNode = null;
+					let bestMatch = {
+						node: null,
+						distance: Number.MAX_SAFE_INTEGER,
+					};
+
+					// Find the closest position in the map
+					const positions = Array.from(
+						state.nodePositions.keys()
+					).sort( ( a, b ) => a - b );
+
+					for ( let i = 0; i < positions.length; i++ ) {
+						const pos = positions[ i ];
+						const nodeData = state.nodePositions.get( pos );
+
+						// Exact match
+						if (
+							pos <= charPosition &&
+							charPosition < pos + nodeData.length
+						) {
+							targetNode = nodeData.node;
+							break;
+						}
+
+						// For Firefox, also track approximate matches as fallback
+						if ( state.browserType === 'firefox' ) {
+							// Calculate distance to this node's position
+							const distance = Math.abs( pos - charPosition );
+							if ( distance < bestMatch.distance ) {
+								bestMatch = { node: nodeData.node, distance };
+							}
+						}
+					}
+
+					// For Firefox, use the best approximate match if no exact match found
+					if (
+						! targetNode &&
+						state.browserType === 'firefox' &&
+						bestMatch.node
+					) {
+						targetNode = bestMatch.node;
+					}
+
+					// Only update highlight if we've found a new leaf node
 					if (
 						targetNode &&
 						targetNode !== state.currentHighlightedNode &&
@@ -497,19 +855,24 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						// Clear previous highlight
 						actions.clearHighlights();
 
-						// Create new highlight
-						const wrapper = actions.createHighlightWrapper(
-							highlightBackground,
-							highlightColor
-						);
-						wrapper.textContent = targetNode.textContent;
-						targetNode.parentNode.replaceChild(
-							wrapper,
-							targetNode
-						);
+						// Create new highlight using selection
+						actions.createHighlightWrapper( targetNode );
 
 						// Update current node reference
-						state.currentHighlightedNode = wrapper.firstChild;
+						state.currentHighlightedNode = targetNode;
+
+						// Scroll the highlighted word into view if needed
+						if ( targetNode.nodeType !== Node.TEXT_NODE ) {
+							targetNode.scrollIntoView( {
+								behavior: 'smooth',
+								block: 'center',
+							} );
+						} else if ( targetNode.parentNode ) {
+							targetNode.parentNode.scrollIntoView( {
+								behavior: 'smooth',
+								block: 'center',
+							} );
+						}
 					}
 				}
 			} catch ( e ) {
@@ -537,14 +900,71 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				hasSelection: false,
 			};
 		},
+		// Add a new method to build the node positions map more efficiently
+		buildNodePositionsMap( rootElement, excludeClasses ) {
+			state.nodePositions.clear();
+
+			// Optimized node collection with filtering
+			const collectTextNodes = ( element, charCount = 0 ) => {
+				// Skip excluded elements
+				if ( element.classList ) {
+					for ( const excludeClass of excludeClasses ) {
+						if (
+							excludeClass &&
+							element.classList.contains( excludeClass )
+						) {
+							return charCount;
+						}
+					}
+				}
+
+				// Process text nodes
+				if ( element.nodeType === Node.TEXT_NODE ) {
+					const text = element.textContent;
+					if ( text.trim().length > 0 ) {
+						state.nodePositions.set( charCount, {
+							node: element,
+							length: text.length,
+						} );
+						charCount += text.length;
+					}
+					return charCount;
+				}
+
+				// Process element children
+				if ( element.childNodes && element.childNodes.length > 0 ) {
+					for ( const child of element.childNodes ) {
+						charCount = collectTextNodes( child, charCount );
+					}
+				}
+
+				return charCount;
+			};
+
+			// Start the collection process
+			collectTextNodes( rootElement );
+		},
 	},
 	callbacks: {
 		init() {
 			if ( ! window.speechSynthesis ) {
+				console.warn(
+					'Speech synthesis not supported in this browser'
+				);
 				return;
 			}
 
+			// Cancel any ongoing speech
 			window.speechSynthesis.cancel();
+
+			// Detect browser type
+			state.browserType = getBrowser();
+			console.log( `Browser detected: ${ state.browserType }` );
+
+			// Initialize highlight colors once at startup
+			initHighlightColors();
+
+			// Load available voices
 			actions.loadVoices();
 
 			if ( window.speechSynthesis.onvoiceschanged !== undefined ) {
@@ -553,7 +973,33 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			window.addEventListener( 'beforeunload', () => {
 				window.speechSynthesis.cancel();
+
+				// Clear any Safari timers
+				if ( state.browserType === 'safari' ) {
+					if ( state.utterance && state.utterance._safariTimerId ) {
+						clearInterval( state.utterance._safariTimerId );
+					}
+
+					if ( state.safariKeepAliveTimer ) {
+						clearInterval( state.safariKeepAliveTimer );
+					}
+				}
 			} );
+
+			// Initial node map building for better performance when playback starts
+			const mainElement = getMainElement();
+			if ( mainElement ) {
+				const blockWrapper = getBlockWrapper();
+				const excludeClassesStr =
+					blockWrapper?.dataset.excludeClass ||
+					DEFAULTS.EXCLUDE_CLASS;
+				setTimeout( () => {
+					actions.buildNodePositionsMap(
+						mainElement,
+						excludeClassesStr.split( /\s+/ )
+					);
+				}, 500 ); // Delay to ensure DOM is ready
+			}
 		},
 		isSelected() {
 			const context = getContext();
@@ -563,13 +1009,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 } );
 
 const updateHighlight = ( targetNode, background, color ) => {
-	requestAnimationFrame( () => {
-		actions.clearHighlights();
-		const wrapper = actions.createHighlightWrapper( background, color );
-		wrapper.textContent = targetNode.textContent;
-		targetNode.parentNode.replaceChild( wrapper, targetNode );
-		state.currentHighlightedNode = wrapper.firstChild;
-	} );
+	requestAnimationFrame( () => {} );
 };
 
 const calculateNodePositions = () => {
@@ -596,4 +1036,249 @@ const calculateNodePositions = () => {
 		} );
 		charCount += node.textContent.length;
 	}
+};
+
+const selectCurrentWord = ( event ) => {
+	if ( ! event || ! event.target ) {
+		return;
+	}
+
+	// Get the node reference properly
+	const node = event.target;
+	const doc = node.ownerDocument;
+	const docView = doc.defaultView;
+
+	if ( ! docView ) {
+		return;
+	}
+
+	// Get clicked text node
+	let textNode = null;
+	let textContent = '';
+
+	if ( node.nodeType === Node.TEXT_NODE ) {
+		textNode = node;
+		textContent = node.textContent;
+	} else if (
+		node.firstChild &&
+		node.firstChild.nodeType === Node.TEXT_NODE
+	) {
+		textNode = node.firstChild;
+		textContent = textNode.textContent;
+	} else {
+		// Not a text node or element containing text
+		return;
+	}
+
+	try {
+		// Get selection from document view
+		const selection = docView.getSelection();
+		if ( ! selection ) {
+			return;
+		}
+
+		// Calculate word boundaries
+		const range = doc.createRange();
+		const clickPos =
+			( event.offsetX / node.offsetWidth ) * textContent.length;
+
+		// Find word boundaries (nearest spaces)
+		let startPos = textContent.lastIndexOf( ' ', clickPos );
+		startPos = startPos === -1 ? 0 : startPos + 1;
+
+		let endPos = textContent.indexOf( ' ', clickPos );
+		endPos = endPos === -1 ? textContent.length : endPos;
+
+		// Set the range to select just the word
+		range.setStart( textNode, startPos );
+		range.setEnd( textNode, endPos );
+
+		// Apply the selection
+		selection.removeAllRanges();
+		selection.addRange( range );
+	} catch ( e ) {
+		console.warn( 'Error selecting word:', e );
+	}
+};
+
+// Helper function to get caret position - optimized to use document view
+const getCaretPosition = ( element ) => {
+	if ( ! element ) {
+		return 0;
+	}
+
+	try {
+		const doc = element.ownerDocument;
+		const docView = doc.defaultView;
+		const selection = docView.getSelection();
+
+		if ( ! selection || ! selection.rangeCount ) {
+			return 0;
+		}
+
+		const range = selection.getRangeAt( 0 );
+		const preCaretRange = range.cloneRange();
+		preCaretRange.selectNodeContents( element );
+		preCaretRange.setEnd( range.endContainer, range.endOffset );
+		return preCaretRange.toString().length;
+	} catch ( e ) {
+		console.warn( 'Error getting caret position:', e );
+		return 0;
+	}
+};
+
+// Export necessary functions for direct use
+export const textToSpeechHelpers = {
+	// Implement the word selection function for external use
+	selectCurrentWord: ( event ) => {
+		if ( ! event || ! event.target ) {
+			return;
+		}
+
+		// Get the node reference properly
+		const node = event.target;
+		const doc = node.ownerDocument;
+		const docView = doc.defaultView;
+
+		if ( ! docView ) {
+			return;
+		}
+
+		// Get clicked text node
+		let textNode = null;
+		let textContent = '';
+
+		if ( node.nodeType === Node.TEXT_NODE ) {
+			textNode = node;
+			textContent = node.textContent;
+		} else if (
+			node.firstChild &&
+			node.firstChild.nodeType === Node.TEXT_NODE
+		) {
+			textNode = node.firstChild;
+			textContent = textNode.textContent;
+		} else {
+			// Not a text node or element containing text
+			return;
+		}
+
+		try {
+			// Get selection from document view
+			const selection = docView.getSelection();
+			if ( ! selection ) {
+				return;
+			}
+
+			// Calculate word boundaries
+			const range = doc.createRange();
+			const clickPos =
+				( event.offsetX / node.offsetWidth ) * textContent.length;
+
+			// Find word boundaries (nearest spaces)
+			let startPos = textContent.lastIndexOf( ' ', clickPos );
+			startPos = startPos === -1 ? 0 : startPos + 1;
+
+			let endPos = textContent.indexOf( ' ', clickPos );
+			endPos = endPos === -1 ? textContent.length : endPos;
+
+			// Set the range to select just the word
+			range.setStart( textNode, startPos );
+			range.setEnd( textNode, endPos );
+
+			// Apply the selection
+			selection.removeAllRanges();
+			selection.addRange( range );
+		} catch ( e ) {
+			console.warn( 'Error selecting word:', e );
+		}
+	},
+
+	// Export get caret position for external use
+	getCaretPosition: ( element ) => {
+		if ( ! element ) {
+			return 0;
+		}
+
+		try {
+			const doc = element.ownerDocument;
+			const docView = doc.defaultView;
+			const selection = docView.getSelection();
+
+			if ( ! selection || ! selection.rangeCount ) {
+				return 0;
+			}
+
+			const range = selection.getRangeAt( 0 );
+			const preCaretRange = range.cloneRange();
+			preCaretRange.selectNodeContents( element );
+			preCaretRange.setEnd( range.endContainer, range.endOffset );
+			return preCaretRange.toString().length;
+		} catch ( e ) {
+			console.warn( 'Error getting caret position:', e );
+			return 0;
+		}
+	},
+
+	// Export node position calculator for external use
+	calculateNodePositions: () => {
+		const mainElement = getMainElement();
+		if ( ! mainElement ) {
+			return;
+		}
+
+		try {
+			const walker = document.createTreeWalker(
+				mainElement,
+				NodeFilter.SHOW_TEXT,
+				{
+					acceptNode( node ) {
+						// Check if node has text content
+						return node.textContent.trim().length > 0
+							? NodeFilter.FILTER_ACCEPT
+							: NodeFilter.FILTER_REJECT;
+					},
+				}
+			);
+
+			let charCount = 0;
+			let node;
+			state.nodePositions.clear();
+
+			while ( ( node = walker.nextNode() ) ) {
+				state.nodePositions.set( charCount, {
+					node,
+					length: node.textContent.length,
+				} );
+				charCount += node.textContent.length;
+			}
+		} catch ( e ) {
+			console.warn( 'Error calculating node positions:', e );
+		}
+	},
+};
+
+// Add this function after the helper functions at the top
+const initHighlightColors = () => {
+	const mainElement = getMainElement();
+	const blockWrapper = getBlockWrapper();
+
+	if ( ! mainElement || ! blockWrapper ) {
+		return;
+	}
+
+	// Get highlight colors from block settings or use defaults
+	const highlightBackground =
+		blockWrapper.dataset.highlightBackground || DEFAULTS.HIGHLIGHT_BG;
+	const highlightColor =
+		blockWrapper.dataset.highlightColor || DEFAULTS.HIGHLIGHT_COLOR;
+
+	// Set CSS custom properties on the main element for easier styling
+	mainElement.style.setProperty(
+		'--mosne-tts-highlight-bg',
+		highlightBackground
+	);
+	mainElement.style.setProperty(
+		'--mosne-tts-highlight-color',
+		highlightColor
+	);
 };
