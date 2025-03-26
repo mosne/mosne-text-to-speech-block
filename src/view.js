@@ -14,7 +14,7 @@ const DEFAULTS = {
 	HIGHLIGHT_BG: '#ffeb3b',
 	HIGHLIGHT_COLOR: '#000000',
 	EXCLUDE_CLASS: 'skip-speech',
-	WORDS_PER_CHUNK: 200,
+	WORDS_PER_CHUNK: 10,
 };
 
 // Helper functions
@@ -213,11 +213,8 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 		// Utterance Management
 		createUtterance() {
-			const content =
-				state.textChunks.length > 0
-					? state.textChunks[ state.currentChunk ]
-					: actions.getContent();
-
+			// Get the content for the current chunk
+			const content = state.textChunks[ state.currentChunk ];
 			const newUtterance = new window.SpeechSynthesisUtterance( content );
 			newUtterance.lang = getCurrentLocale();
 			newUtterance.rate = state.currentSpeed;
@@ -274,7 +271,32 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					clearInterval( utterance._safariTimerId );
 				}
 
-				actions.handleUtteranceEnd();
+				// Check if there are more chunks to process
+				if ( state.currentChunk < state.textChunks.length - 1 ) {
+					// Move to next chunk
+					state.currentChunk++;
+
+					// Create and speak the next utterance
+					actions.createUtterance();
+
+					// Small delay to ensure proper timing
+					setTimeout( () => {
+						if ( state.isPlaying && state.utterance ) {
+							window.speechSynthesis.speak( state.utterance );
+						}
+					}, 50 );
+
+					return;
+				}
+
+				// If we've reached the end of all chunks, perform cleanup
+				state.isPlaying = false;
+				state.currentChunk = 0;
+				state.textChunks = [];
+				state.currentHighlightedNode = null;
+				state.selectedTextRange = {
+					hasSelection: false,
+				};
 			};
 
 			// Ensure we can track errors across browsers
@@ -313,11 +335,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				currentIndex += Math.ceil(
 					( charsPerSecond * intervalTime ) / 1000
 				);
-
-				// Stop if we've reached the end of content
-				if ( currentIndex >= content.length ) {
-					clearInterval( timerId );
-				}
 			}, intervalTime );
 
 			return timerId;
