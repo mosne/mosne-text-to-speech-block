@@ -53,6 +53,10 @@ The icons onf this blocks come from Heroicons with MIT licenses
 
 ## Changelog
 
+### 0.3.1 - 2025-03-26
+
+* Minor Bug fix 
+
 ### 0.3.0 - 2025-03-25
 
 * Added a new custom skip classes field 

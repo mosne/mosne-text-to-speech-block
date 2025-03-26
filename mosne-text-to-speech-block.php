@@ -4,7 +4,7 @@
  * Description:       Read the content of of a page using native Speech Synthesis and  Interactivity API.
  * Requires at least: 6.5
  * Requires PHP:      7.4
- * Version:           0.3.0
+ * Version:           0.3.1
  * Author:            Mosne
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Plugin constants
-define( 'MOSNE_TEXT_TO_SPEECH_VERSION', '0.3.0' );
+define( 'MOSNE_TEXT_TO_SPEECH_VERSION', '0.3.1' );
 
 add_action( 'init', __NAMESPACE__ . '\\mosne_text_to_speach_init' );
 
