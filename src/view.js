@@ -285,18 +285,10 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 							window.speechSynthesis.speak( state.utterance );
 						}
 					}, 50 );
-
-					return;
+				} else {
+					// This is the last chunk, perform cleanup
+					actions.Restart();
 				}
-
-				// If we've reached the end of all chunks, perform cleanup
-				state.isPlaying = false;
-				state.currentChunk = 0;
-				state.textChunks = [];
-				state.currentHighlightedNode = null;
-				state.selectedTextRange = {
-					hasSelection: false,
-				};
 			};
 
 			// Ensure we can track errors across browsers
@@ -502,7 +494,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			}
 		},
 
-		Pause() {
+		async Pause() {
 			const context = getContext();
 			context.isPlaying = false;
 			state.isPlaying = false;
@@ -871,8 +863,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			actions.clearHighlights();
 
 			// Update playing state
-			const context = getContext();
-			context.isPlaying = false;
+
 			state.isPlaying = false;
 
 			// Reset chunk tracking
