@@ -4,7 +4,7 @@ Tags:              block, speech, accessibility, audio, tts
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.7
-Stable tag:        0.3.0
+Stable tag:        0.3.1
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,7 +52,11 @@ You can skip some content by adding the class `.skip-speech` to the element.
 
 == Changelog ==
 
-= 0.2.0 - 2025-03-25 =
+= 0.3.1 - 2025-03-26 =
+
+* Minor bug fix
+
+= 0.3.0 - 2025-03-25 =
 
 * Added a new custom skip classes field 
 * Fix compatibility issues with Firefox and Android.
