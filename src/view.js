@@ -14,7 +14,7 @@ const DEFAULTS = {
 	HIGHLIGHT_BG: '#ffeb3b',
 	HIGHLIGHT_COLOR: '#000000',
 	EXCLUDE_CLASS: 'skip-speech',
-	WORDS_PER_CHUNK: 10,
+	WORDS_PER_CHUNK: 200,
 };
 
 // Helper functions
@@ -765,19 +765,16 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				return;
 			}
 
-			// Safety check for valid boundary event
-			if (
-				event.charIndex === undefined ||
-				event.charLength === undefined ||
-				event.charIndex + event.charLength > content.length
-			) {
-				console.warn(
-					'Invalid boundary event or position out of content bounds'
-				);
-				return;
-			}
-
 			try {
+				// Calculate the absolute position by adding offsets of previous chunks
+				let absoluteCharIndex = event.charIndex;
+				if ( state.currentChunk > 0 ) {
+					// Add lengths of all previous chunks
+					for ( let i = 0; i < state.currentChunk; i++ ) {
+						absoluteCharIndex += state.textChunks[ i ].length + 1; // +1 for space between chunks
+					}
+				}
+
 				if ( state.selectedTextRange?.hasSelection ) {
 					// Handle selected text case...
 				} else {
@@ -788,24 +785,22 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						DEFAULTS.EXCLUDE_CLASS;
 					const excludeClasses = excludeClassesStr.split( /\s+/ );
 
-					// Optimize node finding by using a cached map of text nodes if available
+					// Rebuild node positions map if empty
 					if ( state.nodePositions.size === 0 ) {
-						// Build node positions map on first use
 						actions.buildNodePositionsMap(
 							mainElement,
 							excludeClasses
 						);
 					}
 
-					// Find the node containing the current position using the optimized map
-					const charPosition = event.charIndex;
+					// Find the node containing the current absolute position
 					let targetNode = null;
 					let bestMatch = {
 						node: null,
 						distance: Number.MAX_SAFE_INTEGER,
 					};
 
-					// Find the closest position in the map
+					// Find the closest position in the map using absolute position
 					const positions = Array.from(
 						state.nodePositions.keys()
 					).sort( ( a, b ) => a - b );
@@ -814,26 +809,27 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						const pos = positions[ i ];
 						const nodeData = state.nodePositions.get( pos );
 
-						// Exact match
+						// Exact match using absolute position
 						if (
-							pos <= charPosition &&
-							charPosition < pos + nodeData.length
+							pos <= absoluteCharIndex &&
+							absoluteCharIndex < pos + nodeData.length
 						) {
 							targetNode = nodeData.node;
 							break;
 						}
 
-						// For Firefox, also track approximate matches as fallback
+						// For Firefox, track approximate matches as fallback
 						if ( state.browserType === 'firefox' ) {
-							// Calculate distance to this node's position
-							const distance = Math.abs( pos - charPosition );
+							const distance = Math.abs(
+								pos - absoluteCharIndex
+							);
 							if ( distance < bestMatch.distance ) {
 								bestMatch = { node: nodeData.node, distance };
 							}
 						}
 					}
 
-					// For Firefox, use the best approximate match if no exact match found
+					// Use best approximate match for Firefox if no exact match
 					if (
 						! targetNode &&
 						state.browserType === 'firefox' &&
@@ -842,22 +838,17 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 						targetNode = bestMatch.node;
 					}
 
-					// Only update highlight if we've found a new leaf node
+					// Update highlight if we found a new node
 					if (
 						targetNode &&
 						targetNode !== state.currentHighlightedNode &&
 						targetNode.textContent.trim().length > 0
 					) {
-						// Clear previous highlight
 						actions.clearHighlights();
-
-						// Create new highlight using selection
 						actions.createHighlightWrapper( targetNode );
-
-						// Update current node reference
 						state.currentHighlightedNode = targetNode;
 
-						// Scroll the highlighted word into view if needed
+						// Scroll the highlighted word into view
 						if ( targetNode.nodeType !== Node.TEXT_NODE ) {
 							targetNode.scrollIntoView( {
 								behavior: 'smooth',
