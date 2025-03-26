@@ -751,7 +751,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			return chunks;
 		},
-		handleBoundaryEvent( event, content ) {
+		handleBoundaryEvent( event ) {
 			const mainElement = getMainElement();
 			if ( ! mainElement ) {
 				return;
