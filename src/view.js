@@ -172,7 +172,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 		},
 
 		// Voice Management
-		async loadVoices() {
+		async loadVoices( context ) {
 			// For Safari/iOS, ensure we have access to voices
 			if ( state.browserType === 'safari' ) {
 				// Safari sometimes needs speech synthesis to be triggered first
@@ -186,7 +186,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			if ( ! availableVoices?.length ) {
 				// Try again in a bit - browsers load voices asynchronously
-				setTimeout( () => actions.loadVoices(), 100 );
+				setTimeout( () => actions.loadVoices( context ), 100 );
 				return;
 			}
 
@@ -208,11 +208,11 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				}
 			}
 
-			setTimeout( () => actions.createUtterance(), 50 );
+			setTimeout( () => actions.createUtterance( context ), 50 );
 		},
 
 		// Utterance Management
-		createUtterance() {
+		createUtterance( context ) {
 			// Get the content for the current chunk
 			const content = state.textChunks[ state.currentChunk ];
 			const newUtterance = new window.SpeechSynthesisUtterance( content );
@@ -227,11 +227,11 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				newUtterance.voice = voice;
 			}
 
-			actions.setupUtteranceEvents( newUtterance, content );
+			actions.setupUtteranceEvents( newUtterance, content, context );
 			state.utterance = newUtterance;
 		},
 
-		setupUtteranceEvents( utterance, content ) {
+		setupUtteranceEvents( utterance, content, context ) {
 			// Safari doesn't reliably fire boundary events, so use workarounds
 			if ( state.browserType === 'safari' ) {
 				// For Safari, we'll use word-level events and timeouts
@@ -277,7 +277,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					state.currentChunk++;
 
 					// Create and speak the next utterance
-					actions.createUtterance();
+					actions.createUtterance( context );
 
 					// Small delay to ensure proper timing
 					setTimeout( () => {
@@ -287,7 +287,9 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					}, 50 );
 				} else {
 					// This is the last chunk, perform cleanup
-					actions.Restart();
+					context.isPlaying = false;
+					state.isPlaying = false;
+					actions.clearHighlights();
 				}
 			};
 
@@ -454,7 +456,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 
 			if ( state.textChunks.length === 0 || state.currentChunk === 0 ) {
 				actions.getContent();
-				actions.createUtterance();
+				actions.createUtterance( context );
 			}
 
 			try {
@@ -465,7 +467,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			} catch ( e ) {
 				console.warn( 'Resume failed, recreating speech:', e );
 				// If resume fails, recreate the utterance
-				actions.createUtterance();
+				actions.createUtterance( context );
 			}
 
 			// Chrome and Edge fix - recreate utterance if speaking
@@ -618,11 +620,6 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 					'mosne-tts-lang-' + document.documentElement.lang,
 					voice.voiceURI
 				);
-
-				// Small delay to ensure speech synthesis is ready
-				setTimeout( () => {
-					actions.updateUtterance();
-				}, 50 );
 			}
 		},
 		async changeSpeed( e ) {
@@ -637,7 +634,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			);
 
 			await actions.checkSynthesisReady();
-			actions.createUtterance();
+			actions.createUtterance( context );
 
 			if ( context.isPlaying ) {
 				setTimeout( () => {
@@ -657,7 +654,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			);
 
 			await actions.checkSynthesisReady();
-			actions.createUtterance();
+			actions.createUtterance( context );
 
 			if ( context.isPlaying ) {
 				setTimeout( () => {
@@ -932,6 +929,8 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 				return;
 			}
 
+			const context = getContext();
+
 			// Cancel any ongoing speech
 			window.speechSynthesis.cancel();
 
@@ -942,7 +941,7 @@ const { state, actions } = store( 'mosne-text-to-speech-block', {
 			initHighlightColors();
 
 			// Load available voices
-			actions.loadVoices();
+			actions.loadVoices( context );
 
 			if ( window.speechSynthesis.onvoiceschanged !== undefined ) {
 				window.speechSynthesis.onvoiceschanged = actions.loadVoices;
