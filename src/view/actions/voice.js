@@ -4,7 +4,7 @@
 
 import { getCurrentLocale } from '../utils';
 import { createUtterance } from './utterance';
-
+import { getContext } from '@wordpress/interactivity';
 // Voice Management
 export const loadVoices = async ( state ) => {
 	// For Safari/iOS, ensure we have access to voices

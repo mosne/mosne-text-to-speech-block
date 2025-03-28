@@ -11,7 +11,7 @@ import {
 } from './highlight';
 
 // Utterance Management
-export const createUtterance = ( state ) => {
+export const createUtterance = ( state, context ) => {
 	// Get the content for the current chunk
 	const content = state.textChunks[ state.currentChunk ];
 	const newUtterance = new window.SpeechSynthesisUtterance( content );
@@ -26,11 +26,11 @@ export const createUtterance = ( state ) => {
 		newUtterance.voice = voice;
 	}
 
-	setupUtteranceEvents( state, newUtterance, content );
+	setupUtteranceEvents( state, newUtterance, content, context );
 	state.utterance = newUtterance;
 };
 
-export const setupUtteranceEvents = ( state, utterance, content ) => {
+export const setupUtteranceEvents = ( state, utterance, content, context ) => {
 	// Safari doesn't reliably fire boundary events, so use workarounds
 	if ( state.browserType === 'safari' ) {
 		// For Safari, we'll use word-level events and timeouts
@@ -75,7 +75,7 @@ export const setupUtteranceEvents = ( state, utterance, content ) => {
 			state.currentChunk++;
 
 			// Create and speak the next utterance
-			createUtterance( state );
+			createUtterance( state, context );
 
 			// Small delay to ensure proper timing
 			setTimeout( () => {
@@ -85,7 +85,6 @@ export const setupUtteranceEvents = ( state, utterance, content ) => {
 			}, 50 );
 		} else {
 			// This is the last chunk, perform cleanup
-			const context = getContext();
 			if ( context ) {
 				context.isPlaying = false;
 			}

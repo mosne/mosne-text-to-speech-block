@@ -116,7 +116,7 @@ export const Play = async ( state ) => {
 
 	if ( state.textChunks.length === 0 || state.currentChunk === 0 ) {
 		getContent( state );
-		createUtterance( state );
+		createUtterance( state, context );
 	}
 
 	try {
@@ -127,7 +127,7 @@ export const Play = async ( state ) => {
 	} catch ( e ) {
 		console.warn( 'Resume failed, recreating speech:', e );
 		// If resume fails, recreate the utterance
-		createUtterance( state );
+		createUtterance( state, context );
 	}
 
 	// Chrome and Edge fix - recreate utterance if speaking
@@ -277,7 +277,7 @@ export const changeSpeed = async ( state, e ) => {
 	);
 
 	await checkSynthesisReady();
-	createUtterance( state );
+	createUtterance( state, context );
 
 	if ( context && context.isPlaying ) {
 		setTimeout( () => {
@@ -300,7 +300,7 @@ export const changePitch = async ( state, e ) => {
 	);
 
 	await checkSynthesisReady();
-	createUtterance( state );
+	createUtterance( state, context );
 
 	if ( context && context.isPlaying ) {
 		setTimeout( () => {
