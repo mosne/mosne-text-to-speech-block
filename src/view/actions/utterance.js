@@ -96,7 +96,11 @@ export const setupUtteranceEvents = ( state, utterance, content, context ) => {
 	// Ensure we can track errors across browsers
 	utterance.onerror = ( event ) => {
 		console.error( 'Speech synthesis error:', event );
-		handleUtteranceEnd( state );
+		if ( event.error === 'interrupted' ) {
+			// Reset the speech synthesis state
+			speechSynthesis.cancel();
+			handleUtteranceEnd( state );
+		}
 	};
 };
 

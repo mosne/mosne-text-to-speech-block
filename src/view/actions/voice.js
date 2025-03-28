@@ -43,13 +43,13 @@ export const loadVoices = async ( state ) => {
 };
 
 export const changeVoice = ( state, e ) => {
+	// Cancel any ongoing speech
+	window.speechSynthesis.cancel();
+
 	const context = getContext();
 	if ( context ) {
 		context.isPlaying = false;
 	}
-
-	// Cancel any ongoing speech
-	window.speechSynthesis.cancel();
 
 	const voice = state.voices.find( ( v ) => v.voiceURI === e.target.value );
 

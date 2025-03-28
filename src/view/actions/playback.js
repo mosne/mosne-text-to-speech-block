@@ -264,12 +264,12 @@ export const Restart = ( state ) => {
 };
 
 export const changeSpeed = async ( state, e ) => {
+	window.speechSynthesis.cancel();
+
 	const context = getContext();
 	if ( context ) {
 		context.isPlaying = false;
 	}
-	window.speechSynthesis.cancel();
-
 	state.currentSpeed = e.target.value;
 	window.localStorage.setItem(
 		'mosne-tts-speed-' + document.documentElement.lang,
@@ -279,19 +279,20 @@ export const changeSpeed = async ( state, e ) => {
 	await checkSynthesisReady();
 	createUtterance( state, context );
 
-	if ( context && context.isPlaying ) {
+	if ( context && ! context.isPlaying ) {
 		setTimeout( () => {
+			context.isPlaying = true;
 			window.speechSynthesis.speak( state.utterance );
 		}, 50 );
 	}
 };
 
 export const changePitch = async ( state, e ) => {
+	window.speechSynthesis.cancel();
 	const context = getContext();
 	if ( context ) {
 		context.isPlaying = false;
 	}
-	window.speechSynthesis.cancel();
 
 	state.currentPitch = e.target.value;
 	window.localStorage.setItem(
@@ -302,8 +303,9 @@ export const changePitch = async ( state, e ) => {
 	await checkSynthesisReady();
 	createUtterance( state, context );
 
-	if ( context && context.isPlaying ) {
+	if ( context && ! context.isPlaying ) {
 		setTimeout( () => {
+			context.isPlaying = true;
 			window.speechSynthesis.speak( state.utterance );
 		}, 50 );
 	}
