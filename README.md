@@ -53,6 +53,10 @@ The icons onf this blocks come from Heroicons with MIT licenses
 
 ## Changelog
 
+### 0.3.2 - 2025-03-28
+
+* Complete refactor and bug fix
+
 ### 0.3.1 - 2025-03-26
 
 * Minor Bug fix 
