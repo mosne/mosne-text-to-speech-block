@@ -2,7 +2,6 @@
  * Utterance management actions
  */
 
-import { getContext } from '@wordpress/interactivity';
 import { getCurrentLocale } from '../utils';
 import {
 	handleBoundaryEvent,

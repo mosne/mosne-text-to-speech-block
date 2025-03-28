@@ -2,10 +2,10 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "mosne/text-to-speech",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"title": "Text to Speech",
 	"category": "widgets",
-	"description": "Read the content of of a page using native Speech Synthesis and  Interactivity API.",
+	"description": "Read the content of of a page using native Speech Synthesis and Interactivity API.",
 	"example": {},
 	"supports": {
 		"interactivity": true,

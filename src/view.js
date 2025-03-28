@@ -7,8 +7,8 @@ import { store } from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { initialState } from './view/state';
-import * as acts from './view/actions';
-import * as calls from './view/callbacks';
+import * as a from './view/actions';
+import * as c from './view/callbacks';
 
 // Store configuration
 const { state } = store( 'mosne-text-to-speech-block', {
@@ -17,34 +17,34 @@ const { state } = store( 'mosne-text-to-speech-block', {
 	// Map action creators to pass state as first argument
 	actions: {
 		// Synthesis
-		checkSynthesisReady: () => acts.checkSynthesisReady( state ),
-		setupSafariKeepAlive: () => acts.setupSafariKeepAlive( state ),
+		checkSynthesisReady: () => a.checkSynthesisReady( state ),
+		setupSafariKeepAlive: () => a.setupSafariKeepAlive( state ),
 		//highlight
-		buildNodePositionsMap: () => acts.buildNodePositionsMap( state ),
-		handleBoundaryEvent: () => acts.handleBoundaryEvent( state ),
-		setupSafariHighlighting: () => acts.setupSafariHighlighting( state ),
-		clearHighlights: () => acts.clearHighlights( state ),
+		buildNodePositionsMap: () => a.buildNodePositionsMap( state ),
+		handleBoundaryEvent: () => a.handleBoundaryEvent( state ),
+		setupSafariHighlighting: () => a.setupSafariHighlighting( state ),
+		clearHighlights: () => a.clearHighlights( state ),
 		// Voice
-		loadVoices: () => acts.loadVoices( state ),
-		changeVoice: ( e ) => acts.changeVoice( state, e ),
+		loadVoices: () => a.loadVoices( state ),
+		changeVoice: ( e ) => a.changeVoice( state, e ),
 		// Utterance
-		createUtterance: () => acts.createUtterance( state ),
-		setupUtteranceEvents: () => acts.setupUtteranceEvents( state ),
-		handleUtteranceEnd: () => acts.handleUtteranceEnd( state ),
+		createUtterance: () => a.createUtterance( state ),
+		setupUtteranceEvents: () => a.setupUtteranceEvents( state ),
+		handleUtteranceEnd: () => a.handleUtteranceEnd( state ),
 		// playback
-		Play: () => acts.Play( state ),
-		Pause: () => acts.Pause( state ),
-		Restart: () => acts.Restart( state ),
-		changeSpeed: ( e ) => acts.changeSpeed( state, e ),
-		changePitch: ( e ) => acts.changePitch( state, e ),
-		toggleSettings: () => acts.toggleSettings( state ),
+		Play: () => a.Play( state ),
+		Pause: () => a.Pause( state ),
+		Restart: () => a.Restart( state ),
+		changeSpeed: ( e ) => a.changeSpeed( state, e ),
+		changePitch: ( e ) => a.changePitch( state, e ),
+		toggleSettings: () => a.toggleSettings( state ),
 		// content
-		getContent: () => acts.getContent( state ),
+		getContent: () => a.getContent( state ),
 	},
 
 	// Map callback creators to pass state as argument
 	callbacks: {
-		init: () => calls.init( state ),
-		isSelected: () => calls.isSelected( state ),
+		init: () => c.init( state ),
+		isSelected: () => c.isSelected( state ),
 	},
 } );
