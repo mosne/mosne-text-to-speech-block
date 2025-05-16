@@ -53,6 +53,10 @@ The icons onf this blocks come from Heroicons with MIT licenses
 
 ## Changelog
 
+### 0.3.3 - 2025-05-16
+
+* Fix selected text highlighting after pause and button flex wrap on mobile
+
 ### 0.3.2 - 2025-03-28
 
 * Complete refactor and bug fix
