@@ -3,8 +3,8 @@ Contributors:      mosne
 Tags:              block, speech, accessibility, audio, tts
 Requires at least: 6.5
 Requires PHP:      7.4
-Tested up to:      6.7
-Stable tag:        0.3.2
+Tested up to:      6.8
+Stable tag:        0.3.3
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,7 +52,11 @@ You can skip some content by adding the class `.skip-speech` to the element.
 
 == Changelog ==
 
-= 0.3.1 - 2025-03-28 =
+= 0.3.3 - 2025-05-16 =
+
+* Fix selected text highlighting after pause and button flex wrap on mobile
+
+= 0.3.2 - 2025-03-28 =
 
 * Complete refactor and bug fix
 
@@ -74,6 +78,4 @@ You can skip some content by adding the class `.skip-speech` to the element.
 
 * Initial release
 
-=== Credits ===
-The icons of this block come from Heroicons with MIT license
-[heroicons.com](https://heroicons.com/)
+ah 
