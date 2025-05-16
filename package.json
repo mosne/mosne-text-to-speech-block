@@ -1,6 +1,6 @@
 {
 	"name": "mosne-text-to-speech-block",
-	"version": "0.3.2",
+	"version": "0.3.3",
 	"description": "An interactive block with the Interactivity API.",
 	"author": "The WordPress Contributors",
 	"license": "GPL-2.0-or-later",

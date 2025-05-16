@@ -159,6 +159,7 @@ export const Pause = async ( state ) => {
 		context.isPlaying = false;
 	}
 	state.isPlaying = false;
+	clearHighlights( state );
 
 	// Firefox doesn't fully support pause, so we need to handle it differently
 	if ( state.browserType === 'firefox' ) {
