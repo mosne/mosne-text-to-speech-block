@@ -1,0 +1,58 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"plugins": [
+	  "mosne-text-to-speech-block"
+	],
+	"steps": [
+	  {
+		"step": "updateUserMeta",
+		"meta": {
+		  "admin_color": "modern"
+		},
+		"userId": 1
+	  },
+	  {
+		"step": "installTheme",
+		"themeData": {
+		  "resource": "wordpress.org/themes",
+		  "slug": "mosne-dots"
+		}
+	  },
+	  {
+		"step": "mkdir",
+		"path": "/wordpress/wp-content/plugins/hello-mosne"
+	  },
+	  {
+		"step": "writeFile",
+		"path": "/wordpress/wp-content/plugins/hello-mosne/hello-mosne.php",
+		"data": {
+		  "resource": "url",
+		  "url": "https://github.com/wptrainingteam/hellodashboard/blob/main/hellodashboard.php"
+		}
+	  },
+	  {
+		"step": "activatePlugin",
+		"pluginPath": "hello-mosne/hello-mosne.php"
+	  },
+	  {
+		"step": "importWxr",
+		"file": {
+		  "resource": "url",
+		  "url": "https://github.com/wptrainingteam/hellodashboard/blob/main/playgroundguide.xml"
+		}
+	  }
+	],
+	"preferredVersions": {
+	  "php": "8.0",
+	  "wp": "latest"
+	},
+	"features": {
+	  "networking": true
+	},
+	"login": true,
+	"siteOptions": {
+	  "permalink_structure": "/%postname%/"
+	},
+	"landingPage": "/wp-admin/post-new.php?post_type=page"
+  }
+  
