@@ -15,7 +15,6 @@
     "color": {
       "gradient": true
     },
-    "fontSize": true,
     "shadow": true,
     "spacing": {
       "padding": true,
@@ -32,6 +31,7 @@
       "fontFamily": true,
       "fontWeights": true,
       "fontStyle": true,
+      "fontSize": true,
       "textAlign": true
     },
     "dimensions": {
