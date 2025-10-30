@@ -13,6 +13,12 @@ import {
 import { createUtterance, handleUtteranceEnd } from './utterance';
 import { getContent } from './content';
 import { DEFAULTS } from '../constants';
+import {
+	InputValidator,
+	TTSValidator,
+	SecureStorage,
+	SecureErrorHandler
+} from '../security';
 
 // Playback Controls
 export const Play = async ( state ) => {
@@ -265,56 +271,113 @@ export const Restart = ( state ) => {
 };
 
 export const changeSpeed = async ( state, e ) => {
-	window.speechSynthesis.cancel();
+	try {
+		// Validate input
+		const validatedEvent = InputValidator.validateEvent( e );
+		if ( ! validatedEvent ) {
+			SecureErrorHandler.logError( 'Change Speed', new Error( 'Invalid event object' ) );
+			return false;
+		}
 
-	const context = getContext();
-	if ( context ) {
-		context.isPlaying = false;
-	}
-	state.currentSpeed = e.target.value;
-	window.localStorage.setItem(
-		'mosne-tts-speed-' + document.documentElement.lang,
-		e.target.value
-	);
+		const speed = TTSValidator.validateSpeed( validatedEvent.target.value );
+		if ( speed === null ) {
+			SecureErrorHandler.logError( 'Change Speed', new Error( 'Invalid speed value' ) );
+			return false;
+		}
 
-	await checkSynthesisReady();
-	createUtterance( state, context );
+		window.speechSynthesis.cancel();
 
-	if ( context && ! context.isPlaying ) {
-		setTimeout( () => {
-			context.isPlaying = true;
-			window.speechSynthesis.speak( state.utterance );
-		}, 50 );
+		const context = getContext();
+		if ( context ) {
+			context.isPlaying = false;
+		}
+		
+		state.currentSpeed = speed;
+		
+		// Secure localStorage operation
+		const currentLocale = getCurrentLocale();
+		const storageKey = `mosne-tts-speed-${ currentLocale }`;
+		const success = SecureStorage.setItem( storageKey, speed.toString() );
+		
+		if ( ! success ) {
+			SecureErrorHandler.logError( 'Change Speed', new Error( 'Failed to save speed to localStorage' ) );
+		}
+
+		await checkSynthesisReady();
+		createUtterance( state, context );
+
+		if ( context && ! context.isPlaying ) {
+			setTimeout( () => {
+				context.isPlaying = true;
+				window.speechSynthesis.speak( state.utterance );
+			}, 50 );
+		}
+		
+		return true;
+	} catch ( error ) {
+		SecureErrorHandler.logError( 'Change Speed', error );
+		return false;
 	}
 };
 
 export const changePitch = async ( state, e ) => {
-	window.speechSynthesis.cancel();
-	const context = getContext();
-	if ( context ) {
-		context.isPlaying = false;
-	}
+	try {
+		// Validate input
+		const validatedEvent = InputValidator.validateEvent( e );
+		if ( ! validatedEvent ) {
+			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Invalid event object' ) );
+			return false;
+		}
 
-	state.currentPitch = e.target.value;
-	window.localStorage.setItem(
-		'mosne-tts-pitch-' + document.documentElement.lang,
-		e.target.value
-	);
+		const pitch = TTSValidator.validatePitch( validatedEvent.target.value );
+		if ( pitch === null ) {
+			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Invalid pitch value' ) );
+			return false;
+		}
 
-	await checkSynthesisReady();
-	createUtterance( state, context );
+		window.speechSynthesis.cancel();
+		const context = getContext();
+		if ( context ) {
+			context.isPlaying = false;
+		}
 
-	if ( context && ! context.isPlaying ) {
-		setTimeout( () => {
-			context.isPlaying = true;
-			window.speechSynthesis.speak( state.utterance );
-		}, 50 );
+		state.currentPitch = pitch;
+		
+		// Secure localStorage operation
+		const currentLocale = getCurrentLocale();
+		const storageKey = `mosne-tts-pitch-${ currentLocale }`;
+		const success = SecureStorage.setItem( storageKey, pitch.toString() );
+		
+		if ( ! success ) {
+			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Failed to save pitch to localStorage' ) );
+		}
+
+		await checkSynthesisReady();
+		createUtterance( state, context );
+
+		if ( context && ! context.isPlaying ) {
+			setTimeout( () => {
+				context.isPlaying = true;
+				window.speechSynthesis.speak( state.utterance );
+			}, 50 );
+		}
+		
+		return true;
+	} catch ( error ) {
+		SecureErrorHandler.logError( 'Change Pitch', error );
+		return false;
 	}
 };
 
 export const toggleSettings = () => {
-	const context = getContext();
-	if ( context ) {
-		context.showSettings = ! context.showSettings;
+	try {
+		const context = getContext();
+		if ( context ) {
+			context.showSettings = ! context.showSettings;
+		}
+		return true;
+	} catch ( error ) {
+		SecureErrorHandler.logError( 'Toggle Settings', error );
+		return false;
 	}
 };

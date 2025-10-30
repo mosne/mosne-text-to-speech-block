@@ -4,7 +4,7 @@ Tags:              block, speech, accessibility, audio, tts
 Requires at least: 6.5
 Requires PHP:      7.4
 Tested up to:      6.8
-Stable tag:        0.3.4
+Stable tag:        0.3.5
 License:           GPL-2.0-or-later
 License URI:       https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,15 @@ You can skip some content by adding the class `.skip-speech` to the element.
 1. Example of the plugin in action
 
 == Changelog ==
+
+= 0.3.5 - 2025-12-30 =
+
+* Comprehensive security improvements
+* Input validation for all user inputs
+* Content sanitization for all text processing
+* Secure localStorage operations with validation
+* Enhanced error handling that doesn't expose sensitive information
+* Fixed class exclusion filter functionality
 
 = 0.3.4 - 2025-10-23 =
 
