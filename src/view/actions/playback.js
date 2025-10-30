@@ -17,7 +17,7 @@ import {
 	InputValidator,
 	TTSValidator,
 	SecureStorage,
-	SecureErrorHandler
+	SecureErrorHandler,
 } from '../security';
 
 // Playback Controls
@@ -275,13 +275,19 @@ export const changeSpeed = async ( state, e ) => {
 		// Validate input
 		const validatedEvent = InputValidator.validateEvent( e );
 		if ( ! validatedEvent ) {
-			SecureErrorHandler.logError( 'Change Speed', new Error( 'Invalid event object' ) );
+			SecureErrorHandler.logError(
+				'Change Speed',
+				new Error( 'Invalid event object' )
+			);
 			return false;
 		}
 
 		const speed = TTSValidator.validateSpeed( validatedEvent.target.value );
 		if ( speed === null ) {
-			SecureErrorHandler.logError( 'Change Speed', new Error( 'Invalid speed value' ) );
+			SecureErrorHandler.logError(
+				'Change Speed',
+				new Error( 'Invalid speed value' )
+			);
 			return false;
 		}
 
@@ -291,16 +297,19 @@ export const changeSpeed = async ( state, e ) => {
 		if ( context ) {
 			context.isPlaying = false;
 		}
-		
+
 		state.currentSpeed = speed;
-		
+
 		// Secure localStorage operation
 		const currentLocale = getCurrentLocale();
 		const storageKey = `mosne-tts-speed-${ currentLocale }`;
 		const success = SecureStorage.setItem( storageKey, speed.toString() );
-		
+
 		if ( ! success ) {
-			SecureErrorHandler.logError( 'Change Speed', new Error( 'Failed to save speed to localStorage' ) );
+			SecureErrorHandler.logError(
+				'Change Speed',
+				new Error( 'Failed to save speed to localStorage' )
+			);
 		}
 
 		await checkSynthesisReady();
@@ -312,7 +321,7 @@ export const changeSpeed = async ( state, e ) => {
 				window.speechSynthesis.speak( state.utterance );
 			}, 50 );
 		}
-		
+
 		return true;
 	} catch ( error ) {
 		SecureErrorHandler.logError( 'Change Speed', error );
@@ -325,13 +334,19 @@ export const changePitch = async ( state, e ) => {
 		// Validate input
 		const validatedEvent = InputValidator.validateEvent( e );
 		if ( ! validatedEvent ) {
-			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Invalid event object' ) );
+			SecureErrorHandler.logError(
+				'Change Pitch',
+				new Error( 'Invalid event object' )
+			);
 			return false;
 		}
 
 		const pitch = TTSValidator.validatePitch( validatedEvent.target.value );
 		if ( pitch === null ) {
-			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Invalid pitch value' ) );
+			SecureErrorHandler.logError(
+				'Change Pitch',
+				new Error( 'Invalid pitch value' )
+			);
 			return false;
 		}
 
@@ -342,14 +357,17 @@ export const changePitch = async ( state, e ) => {
 		}
 
 		state.currentPitch = pitch;
-		
+
 		// Secure localStorage operation
 		const currentLocale = getCurrentLocale();
 		const storageKey = `mosne-tts-pitch-${ currentLocale }`;
 		const success = SecureStorage.setItem( storageKey, pitch.toString() );
-		
+
 		if ( ! success ) {
-			SecureErrorHandler.logError( 'Change Pitch', new Error( 'Failed to save pitch to localStorage' ) );
+			SecureErrorHandler.logError(
+				'Change Pitch',
+				new Error( 'Failed to save pitch to localStorage' )
+			);
 		}
 
 		await checkSynthesisReady();
@@ -361,7 +379,7 @@ export const changePitch = async ( state, e ) => {
 				window.speechSynthesis.speak( state.utterance );
 			}, 50 );
 		}
-		
+
 		return true;
 	} catch ( error ) {
 		SecureErrorHandler.logError( 'Change Pitch', error );

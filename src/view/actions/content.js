@@ -5,18 +5,17 @@
 import { DEFAULTS } from '../constants';
 import { getBlockWrapper, getMainElement } from '../utils';
 import { buildNodePositionsMap } from './highlight';
-import {
-	ContentSanitizer,
-	SecureDOM,
-	SecureErrorHandler
-} from '../security';
+import { ContentSanitizer, SecureDOM, SecureErrorHandler } from '../security';
 
 export const getContent = ( state ) => {
 	try {
 		// Check if there is highlighted text
 		const mainElement = getMainElement();
 		if ( ! mainElement ) {
-			SecureErrorHandler.logError( 'Get Content', new Error( 'Main element not found' ) );
+			SecureErrorHandler.logError(
+				'Get Content',
+				new Error( 'Main element not found' )
+			);
 			return '';
 		}
 
@@ -28,7 +27,7 @@ export const getContent = ( state ) => {
 			// Get selected text and sanitize it
 			const rawContent = selection.toString();
 			content = ContentSanitizer.sanitizeText( rawContent );
-			
+
 			state.selectedTextRange = {
 				text: content,
 				hasSelection: true,
@@ -36,21 +35,29 @@ export const getContent = ( state ) => {
 		} else {
 			// Get content from main element using secure methods
 			const blockWrapper = getBlockWrapper();
-			const excludeClassesStr = blockWrapper?.dataset.excludeClass || DEFAULTS.EXCLUDE_CLASS;
-			const excludeClasses = excludeClassesStr.split( /\s+/ ).filter( cls => cls.trim() );
+			const excludeClassesStr =
+				blockWrapper?.dataset.excludeClass || DEFAULTS.EXCLUDE_CLASS;
+			const excludeClasses = excludeClassesStr
+				.split( /\s+/ )
+				.filter( ( cls ) => cls.trim() );
 
 			// Clone and remove excluded classes to filter out unwanted content
 			let cloneMain = mainElement.cloneNode( true );
 			if ( cloneMain ) {
 				const safeClassPattern = /^[A-Za-z0-9_-]+$/;
 				excludeClasses.forEach( ( excludeClass ) => {
-					if ( excludeClass && safeClassPattern.test( excludeClass ) ) {
+					if (
+						excludeClass &&
+						safeClassPattern.test( excludeClass )
+					) {
 						// Escape class if CSS.escape is available
 						const escapedClass =
 							typeof CSS !== 'undefined' && CSS.escape
 								? CSS.escape( excludeClass )
 								: excludeClass;
-						const toRemove = cloneMain.querySelectorAll( `.${ escapedClass }` );
+						const toRemove = cloneMain.querySelectorAll(
+							`.${ escapedClass }`
+						);
 						toRemove.forEach( ( el ) => {
 							el.remove();
 						} );
@@ -64,11 +71,7 @@ export const getContent = ( state ) => {
 
 			// Pre-build the node position map for faster highlighting
 			if ( mainElement ) {
-				buildNodePositionsMap(
-					state,
-					mainElement,
-					excludeClasses
-				);
+				buildNodePositionsMap( state, mainElement, excludeClasses );
 			}
 
 			state.selectedTextRange = {
@@ -77,8 +80,12 @@ export const getContent = ( state ) => {
 		}
 
 		// Validate content length
-		if ( content.length > 50000 ) { // Reasonable limit for TTS
-			SecureErrorHandler.logError( 'Get Content', new Error( 'Content too long for processing' ) );
+		if ( content.length > 50000 ) {
+			// Reasonable limit for TTS
+			SecureErrorHandler.logError(
+				'Get Content',
+				new Error( 'Content too long for processing' )
+			);
 			content = content.substring( 0, 50000 );
 		}
 
@@ -108,9 +115,12 @@ export const chunkText = ( text, wordsPerChunk ) => {
 
 		// Sanitize text before processing
 		const sanitizedText = ContentSanitizer.sanitizeText( text );
-		
+
 		// Split the text into words
-		const words = sanitizedText.trim().split( /\s+/ ).filter( word => word.length > 0 );
+		const words = sanitizedText
+			.trim()
+			.split( /\s+/ )
+			.filter( ( word ) => word.length > 0 );
 		const chunks = [];
 
 		// Create chunks of approximately wordsPerChunk words

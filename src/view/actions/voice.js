@@ -9,7 +9,7 @@ import {
 	InputValidator,
 	TTSValidator,
 	SecureStorage,
-	SecureErrorHandler
+	SecureErrorHandler,
 } from '../security';
 // Voice Management
 export const loadVoices = async ( state ) => {
@@ -30,18 +30,23 @@ export const loadVoices = async ( state ) => {
 		}
 
 		const currentLocale = getCurrentLocale();
-		
+
 		// Validate and filter voices
-		const validVoices = availableVoices.filter( voice => {
-			return voice && 
-				   typeof voice.lang === 'string' && 
-				   typeof voice.voiceURI === 'string' &&
-				   voice.lang.length > 0 &&
-				   voice.voiceURI.length > 0;
-		});
+		const validVoices = availableVoices.filter( ( voice ) => {
+			return (
+				voice &&
+				typeof voice.lang === 'string' &&
+				typeof voice.voiceURI === 'string' &&
+				voice.lang.length > 0 &&
+				voice.voiceURI.length > 0
+			);
+		} );
 
 		if ( validVoices.length === 0 ) {
-			SecureErrorHandler.logError( 'Load Voices', new Error( 'No valid voices found' ) );
+			SecureErrorHandler.logError(
+				'Load Voices',
+				new Error( 'No valid voices found' )
+			);
 			return;
 		}
 
@@ -53,7 +58,10 @@ export const loadVoices = async ( state ) => {
 		state.currentVoice = state.voices[ 0 ];
 
 		if ( state.preferredVoice ) {
-			const validatedVoice = TTSValidator.validateVoice( state.preferredVoice, state.voices );
+			const validatedVoice = TTSValidator.validateVoice(
+				state.preferredVoice,
+				state.voices
+			);
 			if ( validatedVoice ) {
 				state.currentVoice = validatedVoice;
 			}
@@ -72,13 +80,21 @@ export const changeVoice = ( state, e ) => {
 		// Validate input
 		const validatedEvent = InputValidator.validateEvent( e );
 		if ( ! validatedEvent ) {
-			SecureErrorHandler.logError( 'Change Voice', new Error( 'Invalid event object' ) );
+			SecureErrorHandler.logError(
+				'Change Voice',
+				new Error( 'Invalid event object' )
+			);
 			return false;
 		}
 
-		const voiceURI = InputValidator.validateString( validatedEvent.target.value );
+		const voiceURI = InputValidator.validateString(
+			validatedEvent.target.value
+		);
 		if ( ! voiceURI ) {
-			SecureErrorHandler.logError( 'Change Voice', new Error( 'Invalid voice URI' ) );
+			SecureErrorHandler.logError(
+				'Change Voice',
+				new Error( 'Invalid voice URI' )
+			);
 			return false;
 		}
 
@@ -93,19 +109,25 @@ export const changeVoice = ( state, e ) => {
 		// Validate voice exists in available voices
 		const voice = TTSValidator.validateVoice( voiceURI, state.voices );
 		if ( ! voice ) {
-			SecureErrorHandler.logError( 'Change Voice', new Error( 'Voice not found in available voices' ) );
+			SecureErrorHandler.logError(
+				'Change Voice',
+				new Error( 'Voice not found in available voices' )
+			);
 			return false;
 		}
 
 		state.currentVoice = voice;
-		
+
 		// Secure localStorage operation
 		const currentLocale = getCurrentLocale();
 		const storageKey = `mosne-tts-lang-${ currentLocale }`;
 		const success = SecureStorage.setItem( storageKey, voice.voiceURI );
-		
+
 		if ( ! success ) {
-			SecureErrorHandler.logError( 'Change Voice', new Error( 'Failed to save voice to localStorage' ) );
+			SecureErrorHandler.logError(
+				'Change Voice',
+				new Error( 'Failed to save voice to localStorage' )
+			);
 		}
 
 		return true;

@@ -7,7 +7,7 @@ import {
 	SecureStorage,
 	SecureDOM,
 	ContentSanitizer,
-	SecureErrorHandler
+	SecureErrorHandler,
 } from './security';
 
 export const getLocalStorageItem = ( key, defaultValue ) => {
@@ -25,7 +25,9 @@ export const getCurrentLocale = () => {
 };
 
 export const getBlockWrapper = () => {
-	return SecureDOM.querySelector( '[data-wp-interactive="mosne-text-to-speech-block"]' );
+	return SecureDOM.querySelector(
+		'[data-wp-interactive="mosne-text-to-speech-block"]'
+	);
 };
 
 export const getMainElement = () => {
@@ -42,7 +44,7 @@ export const getBrowser = () => {
 
 		// Sanitize user agent string
 		const sanitizedUA = ContentSanitizer.sanitizeText( userAgent );
-		
+
 		if ( sanitizedUA.indexOf( 'Firefox' ) !== -1 ) {
 			return 'firefox';
 		}
@@ -74,17 +76,25 @@ export const initHighlightColors = () => {
 		const blockWrapper = getBlockWrapper();
 
 		if ( ! mainElement || ! blockWrapper ) {
-			SecureErrorHandler.logError( 'Init Highlight Colors', new Error( 'Required elements not found' ) );
+			SecureErrorHandler.logError(
+				'Init Highlight Colors',
+				new Error( 'Required elements not found' )
+			);
 			return false;
 		}
 
 		// Get highlight colors from block settings or use defaults
-		const rawHighlightBackground = blockWrapper.dataset.highlightBackground || DEFAULTS.HIGHLIGHT_BG;
-		const rawHighlightColor = blockWrapper.dataset.highlightColor || DEFAULTS.HIGHLIGHT_COLOR;
+		const rawHighlightBackground =
+			blockWrapper.dataset.highlightBackground || DEFAULTS.HIGHLIGHT_BG;
+		const rawHighlightColor =
+			blockWrapper.dataset.highlightColor || DEFAULTS.HIGHLIGHT_COLOR;
 
 		// Sanitize color values
-		const highlightBackground = ContentSanitizer.sanitizeColor( rawHighlightBackground );
-		const highlightColor = ContentSanitizer.sanitizeColor( rawHighlightColor );
+		const highlightBackground = ContentSanitizer.sanitizeColor(
+			rawHighlightBackground
+		);
+		const highlightColor =
+			ContentSanitizer.sanitizeColor( rawHighlightColor );
 
 		// Set CSS custom properties securely
 		const bgSuccess = SecureDOM.setCSSProperty(
@@ -92,7 +102,7 @@ export const initHighlightColors = () => {
 			'--mosne-tts-highlight-bg',
 			highlightBackground
 		);
-		
+
 		const colorSuccess = SecureDOM.setCSSProperty(
 			mainElement,
 			'--mosne-tts-highlight-color',
