@@ -53,6 +53,21 @@ The icons onf this blocks come from Heroicons with MIT licenses
 
 ## Changelog
 
+### 0.3.5 - 2025-10-30
+
+* Comprehensive security improvements
+* Input validation for all user inputs
+* Content sanitization for all text processing
+* Secure localStorage operations with validation
+* Enhanced error handling that doesn't expose sensitive information
+* Fixed class exclusion filter functionality
+
+### 0.3.4 - 2025-10-23
+
+* Fix A11y issues on svg icons
+* Fix hidden buttons styles
+* Fix block support declaration issue
+
 ### 0.3.3 - 2025-05-16
 
 * Fix selected text highlighting after pause and button flex wrap on mobile
