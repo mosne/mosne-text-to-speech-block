@@ -93,4 +93,6 @@ You can skip some content by adding the class `.skip-speech` to the element.
 
 * Initial release
 
-ah 
+=== Credits ===
+The icons of this block come from Heroicons with MIT license
+[heroicons.com](https://heroicons.com/)
