@@ -1,0 +1,34 @@
+name: "Update Readme and Assets on WordPress.org"
+
+on:
+  workflow_dispatch:
+jobs:
+  update-readme:
+    name: "Update readme.txt and assets on WordPress.org"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: main
+
+      - id: set-vars
+        name: "Set variables from .plugin-data file"
+        run: |
+          # Get all data from .plugin-data file
+          content=`cat ./.plugin-data`
+          # the following lines are only required for multi line json
+          content="${content//'%'/'%25'}"
+          content="${content//$'\n'/'%0A'}"
+          content="${content//$'\r'/'%0D'}"
+          # end of optional handling for multi line json
+          echo "::set-output name=pluginData::$content"
+
+      - id: deploy
+        name: "WordPress.org plugin asset/readme update"
+        uses: 10up/action-wordpress-plugin-asset-update@stable
+        env:
+          SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+          SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}
+          SLUG: ${{fromJson(steps.set-vars.outputs.pluginData).slug}}
+          IGNORE_OTHER_FILES: true
